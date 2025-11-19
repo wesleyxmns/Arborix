@@ -33,7 +33,6 @@ export interface TreeState {
 
 export type SelectionMode = 'none' | 'single' | 'multiple';
 export type CheckMode = 'independent' | 'tri-state';
-export type LayoutType = 'vertical' | 'horizontal' | 'orgchart' | 'vscode';
 
 // Drag & Drop types
 export type DropPosition = 'before' | 'after' | 'inside';
@@ -77,7 +76,6 @@ export interface UseTreeLayoutProps {
   data: TreeData;
   openIds: Set<TreeNodeId>;
   searchResults?: TreeNodeId[];
-  layout: LayoutType; // 'vertical', 'horizontal', 'orgchart', 'vscode'
   rowHeight: number;
   containerWidth: number;
   containerHeight: number;

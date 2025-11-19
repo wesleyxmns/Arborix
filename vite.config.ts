@@ -15,6 +15,8 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
+        'react/jsx-runtime',        
+        'react/jsx-dev-runtime',       
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
@@ -29,6 +31,13 @@ export default defineConfig({
         'ramda',
         'eventemitter3'
       ],
+      output: {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'jsxRuntime' 
+        }
+      }
     },
     sourcemap: true,
     minify: 'terser',

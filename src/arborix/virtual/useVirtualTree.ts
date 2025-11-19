@@ -1,4 +1,3 @@
-// src/arborix/virtual/useVirtualTree.ts
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useMemo } from 'react';
 import { flattenVisibleTree, type VisibleNode } from '../utils/flattenTree';
