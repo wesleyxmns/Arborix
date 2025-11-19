@@ -1,6 +1,6 @@
 {
   "name": "arborix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Componente React para Tree View de Alto Desempenho com Virtualização e D&D.",
   "author": "Wesley Ximenes",
   "license": "MIT",
@@ -44,16 +44,14 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-typescript": "^12.3.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.14.0",
     "@types/ramda": "^0.31.1",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "rollup": "^4.53.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "terser": "^5.44.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.8"
