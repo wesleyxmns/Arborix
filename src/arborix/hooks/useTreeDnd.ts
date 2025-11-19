@@ -1,7 +1,6 @@
-// src/arborix/hooks/useTreeState.ts
-import { useReducer, useRef, useCallback } from 'react';
-import { produce, Draft } from 'immer';
 import EventEmitter from 'eventemitter3';
+import { Draft, produce } from 'immer';
+import { useCallback, useReducer, useRef } from 'react';
 import type { TreeData, TreeNodeId, TreeState } from '../types';
 
 type Action =
@@ -20,6 +19,7 @@ const initialTreeState = (data: TreeData): TreeState => ({
   openIds: new Set<TreeNodeId>(),
   selectedIds: new Set<TreeNodeId>(),
   checkedIds: new Set<TreeNodeId>(),
+  partialCheckedIds: new Set<TreeNodeId>(),
   history: [data],
   historyIndex: 0,
 });

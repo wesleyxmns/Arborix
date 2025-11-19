@@ -1,12 +1,11 @@
 {
   "name": "arborix",
   "version": "1.0.0",
-  "description": "O componente de árvore mais avançado do ecossistema React",
+  "description": "Componente React para Tree View de Alto Desempenho com Virtualização e D&D.",
   "author": "Wesley Ximenes",
   "license": "MIT",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
-  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
@@ -14,8 +13,11 @@
       "types": "./dist/types/index.d.ts"
     }
   },
+  "types": "./dist/types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "vite build --watch",
@@ -42,12 +44,17 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.14.0",
     "@types/ramda": "^0.31.1",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "rollup": "^4.53.3",
+    "terser": "^5.44.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.8"
   }

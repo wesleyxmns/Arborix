@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/arborix/index.ts'),
+      entry: resolve(__dirname, 'src/arborix/root.ts'),
       name: 'Arborix',
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`,
     },
@@ -18,6 +18,7 @@ export default defineConfig({
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
+        '@tanstack/react-virtual',
         'framer-motion',
         'react-aria',
         'react-virtual',
@@ -28,12 +29,6 @@ export default defineConfig({
         'ramda',
         'eventemitter3'
       ],
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
-      },
     },
     sourcemap: true,
     minify: 'terser',
