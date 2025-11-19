@@ -29,10 +29,10 @@
 
 ```bash
 # Com npm
-npm install @wesleyxmns/arborix
+npm install arborix
 
 # Com yarn
-yarn add @wesleyxmns/arborix
+yarn add arborix
 ```
 
 ## 🚀 Uso Rápido
