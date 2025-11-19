@@ -69,26 +69,29 @@ const insertNode = (
   nodeToInsert: TreeNode,
   position: DropPosition
 ): TreeData => {
-  // Cria uma cópia profunda dos dados para manipular.
-  // Isso é necessário porque 'immer' só é usado no useTreeState, não aqui.
-  const newData = JSON.parse(JSON.stringify(data)) as TreeData;
+  // Função auxiliar para clonar profundamente
+  const deepClone = <T,>(obj: T): T => {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(deepClone) as T;
+    
+    const cloned = { ...obj } as any;
+    for (const key in cloned) {
+      cloned[key] = deepClone(cloned[key]);
+    }
+    return cloned;
+  };
 
+  const newData = deepClone(data);
   const targetInfo = findNodeAndParent(newData, targetId);
 
-  if (!targetInfo) {
-    // Retorna a cópia se o alvo não for encontrado
-    return newData; 
-  }
+  if (!targetInfo) return newData;
 
   const { node: targetNode, parentArray, index } = targetInfo;
 
   if (position === 'inside') {
-    // 1. Drop INSIDE: Adiciona como filho (unshift para ser o primeiro)
     targetNode.children = targetNode.children || [];
     targetNode.children.unshift(nodeToInsert);
-    // ⚠️ Se você tem um estado de 'openIds', talvez seja necessário garantir que o nó alvo está aberto
   } else {
-    // 2. Drop BEFORE/AFTER: Adiciona como irmão no parentArray
     if (position === 'before') {
       parentArray.splice(index, 0, nodeToInsert);
     } else if (position === 'after') {
@@ -99,8 +102,6 @@ const insertNode = (
   return newData;
 };
 
-
-// Checa se o nó é descendente (função do seu snippet, mantida)
 const isDescendantOf = (
   nodeId: TreeNodeId,
   potentialAncestorId: TreeNodeId,

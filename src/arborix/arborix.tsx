@@ -612,7 +612,12 @@ export const Arborix: React.FC<ArborixProps> = ({
             strategy: MeasuringStrategy.Always,
           },
         }}
-        onDragStart={({ active }) => handleDragStart(active.id)}
+        onDragStart={({ active }) => handleDragStart(active.id as TreeNodeId)}
+        onDragOver={({ active, over }) => {
+          if (over && active.id !== over.id) {
+            handleDragOver(over.id as TreeNodeId, 'inside');
+          }
+        }}
         onDragEnd={handleDrop}
         onDragCancel={handleDragCancel}
       >

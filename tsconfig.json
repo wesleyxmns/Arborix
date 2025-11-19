@@ -21,6 +21,7 @@
     "types": ["node"],
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": false, 
     "sourceMap": true,
     "outDir": "./dist/types",
     "rootDir": "./src"

@@ -1,10 +1,17 @@
-// vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import dts from 'vite-plugin-dts'; // ← ADICIONE ESTE PLUGIN
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    dts({
+      insertTypesEntry: true,
+      include: ['src'],
+      outDir: 'dist/types',
+    }),
+  ],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/arborix/root.ts'),
@@ -15,27 +22,27 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
-        'react/jsx-runtime',        
-        'react/jsx-dev-runtime',       
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
         '@tanstack/react-virtual',
         'framer-motion',
         'react-aria',
-        'react-virtual',
         'immer',
         'lodash-es',
         'nanoid',
         'zod',
         'ramda',
-        'eventemitter3'
+        'eventemitter3',
+        'lucide-react'  // ← ADICIONE
       ],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          'react/jsx-runtime': 'jsxRuntime' 
+          'react/jsx-runtime': 'jsxRuntime'
         }
       }
     },
