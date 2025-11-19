@@ -1,6 +1,6 @@
 {
   "name": "arborix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Componente React para Tree View de Alto Desempenho com Virtualização e D&D.",
   "author": "Wesley Ximenes",
   "license": "MIT",
