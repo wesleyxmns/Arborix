@@ -14,7 +14,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/arborix/root.ts'),
+      entry: resolve(__dirname, 'src/index.ts'), // <--- MUDOU DE root.ts PARA index.ts
       name: 'Arborix',
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`,
     },
