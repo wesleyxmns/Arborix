@@ -31,11 +31,16 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
         const saved = localStorage.getItem(`arborix-${persistenceKey}`);
         if (saved) {
           const parsed = JSON.parse(saved);
+          // Load persisted data if available, otherwise use initialData
+          const persistedData = parsed.data || initialData;
           return {
             ...baseState,
+            data: persistedData,
             openIds: new Set(parsed.openIds || []),
             selectedIds: new Set(parsed.selectedIds || []),
             checkedIds: new Set(parsed.checkedIds || []),
+            history: [persistedData],
+            historyIndex: 0,
           };
         }
       } catch (e) {
@@ -63,6 +68,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     }
 
     const stateToSave = {
+      data: state.data,
       openIds: Array.from(state.openIds),
       selectedIds: Array.from(state.selectedIds),
       checkedIds: Array.from(state.checkedIds),
@@ -73,7 +79,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     } catch (e) {
       console.warn('Arborix: Falha ao salvar estado', e);
     }
-  }, [state.openIds, state.selectedIds, state.checkedIds, persistenceKey]);
+  }, [state.data, state.openIds, state.selectedIds, state.checkedIds, persistenceKey]);
 
   const [editingNodeId, setEditingNodeId] = useState<TreeNodeId | null>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<TreeNodeId | null>(null);

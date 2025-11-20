@@ -1,6 +1,5 @@
-import React from 'react';
-import { TreeNode } from '../../types';
 import { GripVertical } from 'lucide-react';
+import { TreeNode } from '../../types';
 
 export interface TreeToolbarProps {
   undo: () => void;
@@ -20,6 +19,14 @@ export interface TreeToolbarProps {
   enableDragDrop: boolean;
   isDragEnabled: boolean;
   onToggleDrag: () => void;
+
+  // Expand/Collapse All
+  showExpandButtons?: boolean;
+  onExpandAll?: () => void;
+  onCollapseAll?: () => void;
+
+  // Paste
+  onPaste?: () => void;
 }
 
 export const TreeToolbar: React.FC<TreeToolbarProps> = ({
@@ -35,6 +42,10 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
   enableDragDrop,
   isDragEnabled,
   onToggleDrag,
+  showExpandButtons = false,
+  onExpandAll,
+  onCollapseAll,
+  onPaste,
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -64,6 +75,36 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
       >
         + Add Node
       </button>
+
+      {showExpandButtons && onExpandAll && onCollapseAll && (
+        <div className="flex gap-1">
+          <button
+            onClick={onExpandAll}
+            className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
+            title="Expand all nodes"
+          >
+            ⊕ Expand All
+          </button>
+          <button
+            onClick={onCollapseAll}
+            className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
+            title="Collapse all nodes"
+          >
+            ⊖ Collapse All
+          </button>
+        </div>
+      )}
+
+      {onPaste && (
+        <button
+          onClick={onPaste}
+          disabled={!clipboard}
+          className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Paste (Cmd/Ctrl + V)"
+        >
+          📋 Paste
+        </button>
+      )}
 
       {enableDragDrop && (
         <button

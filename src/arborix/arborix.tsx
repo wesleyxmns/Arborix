@@ -1,13 +1,12 @@
-import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragOverlay, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import React, { useEffect } from 'react';
-
 import { ContextMenu } from './components/ContextMenu/ContextMenu';
 import { NodeRenderer } from './components/NodeRenderer/NodeRenderer';
 import { SearchBar } from './components/SearchBar/SearchBar';
 import { TreeToolbar } from './components/TreeToolbar/TreeToolbar';
 import { useArborix } from './hooks/useArborix';
 import type { ArborixProps, TreeNodeId } from './types';
+import { useEffect } from 'react';
 
 export type { ArborixProps };
 
@@ -96,6 +95,25 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
         enableDragDrop={enableDragDrop}
         isDragEnabled={isDragEnabled}
         onToggleDrag={toggleDrag}
+        showExpandButtons={showExpandButtons}
+        onExpandAll={() => {
+          const allParentNodeIds = flatData
+            .filter(item => item.node.children && item.node.children.length > 0)
+            .map(item => item.node.id);
+          allParentNodeIds.forEach(id => {
+            if (!state.openIds.has(id)) handleToggle(id);
+          });
+        }}
+        onCollapseAll={() => {
+          const allOpenNodeIds = Array.from(state.openIds);
+          allOpenNodeIds.forEach(id => stateHook.toggleOpen(id));
+        }}
+        onPaste={() => {
+          const targetId = state.selectedIds.size > 0
+            ? Array.from(state.selectedIds)[0]
+            : null;
+          clipboardHook.pasteNode(targetId);
+        }}
       />
 
       {enableSearch && (
@@ -114,10 +132,10 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
       <DndContext
         sensors={sensors}
         {...dndConfig}
-        onDragStart={({ active }) => handleDragStart(active.id as TreeNodeId)}
-        onDragOver={({ active, over }) => {
-          if (over && active.id !== over.id) {
-            handleDragOver(over.id as TreeNodeId, 'inside');
+        onDragStart={(event: DragStartEvent) => handleDragStart(event.active.id as TreeNodeId)}
+        onDragOver={(event: DragOverEvent) => {
+          if (event.over && event.active.id !== event.over.id) {
+            handleDragOver(event.over.id as TreeNodeId, 'inside');
           }
         }}
         onDragEnd={handleDrop}
@@ -173,15 +191,14 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                         const y = e.clientY - rect.top;
                         const height = rect.height;
 
-                        // Improved drop zones:
-                        // Top 25%: Before
-                        // Bottom 25%: After
-                        // Middle 50%: Inside (if it's a folder or we want to make it one)
-                        // For leaves, we might want to bias towards before/after unless hovering strictly over the center.
+                        // For leaf nodes (no children), prefer before/after (same-level reordering)
+                        // Use 50/50 split for easier sibling reordering
+                        const hasChildren = (node.children && node.children.length > 0) || (!!onLoadData && !node.isLeaf);
+                        const threshold = hasChildren ? 0.25 : 0.5;
 
-                        if (y < height * 0.25) {
+                        if (y < height * threshold) {
                           handleDragOver(node.id, 'before');
-                        } else if (y > height * 0.75) {
+                        } else if (y > height * (1 - threshold)) {
                           handleDragOver(node.id, 'after');
                         } else {
                           handleDragOver(node.id, 'inside');
@@ -219,7 +236,6 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                       onContextMenu={enableContextMenu ? (e) => handleNodeContextMenu(e, node.id) : undefined}
                       canLoadData={!!onLoadData}
                       isFocused={isFocused}
-                      showExpandButtons={showExpandButtons}
                       ariaSetSize={ariaSetSize}
                       ariaPosInSet={ariaPosInSet}
                     />
