@@ -1,12 +1,6 @@
-// src/arborix/hooks/useDragDrop.ts
 import { useCallback, useState } from 'react';
 import type { DropPosition, TreeData, TreeNode, TreeNodeId } from '../types';
 
-// ====================================================================
-// FUNÇÕES AUXILIARES DE MANIPULAÇÃO DE ÁRVORE (IMUTÁVEL)
-// ====================================================================
-
-// Localiza um nó e seu array pai imediato
 const findNodeAndParent = (
   nodes: TreeData,
   id: TreeNodeId
@@ -24,7 +18,6 @@ const findNodeAndParent = (
   return null;
 };
 
-// ⚠️ Refatorada para ser imutável e pura (não altera 'nodes' diretamente)
 const removeNode = (
   data: TreeData,
   nodeId: TreeNodeId
@@ -35,24 +28,22 @@ const removeNode = (
     return nodes.reduce<TreeData>((acc, node) => {
       if (node.id === nodeId) {
         removedNode = node;
-        return acc; // Não inclui o nó na nova lista (remoção)
+        return acc;
       }
-      
-      let newNode = { ...node }; // Cópia superficial do nó pai para imutabilidade
+
+      let newNode = { ...node };
       if (node.children) {
         const newChildren = remove(node.children);
-        
-        // Se a lista de filhos mudou, atualiza.
+
         if (newChildren.length !== node.children.length || newChildren !== node.children) {
-            newNode.children = newChildren;
+          newNode.children = newChildren;
         }
 
-        // Se o array de filhos ficou vazio, remove a propriedade 'children'
         if (newNode.children?.length === 0) {
-            delete newNode.children;
+          delete newNode.children;
         }
       }
-      
+
       acc.push(newNode);
       return acc;
     }, []);
@@ -62,18 +53,16 @@ const removeNode = (
   return { newData, removedNode };
 };
 
-// 🔑 Função Crítica: Insere o nó no novo local
 const insertNode = (
   data: TreeData,
   targetId: TreeNodeId,
   nodeToInsert: TreeNode,
   position: DropPosition
 ): TreeData => {
-  // Função auxiliar para clonar profundamente
   const deepClone = <T,>(obj: T): T => {
     if (obj === null || typeof obj !== 'object') return obj;
     if (Array.isArray(obj)) return obj.map(deepClone) as T;
-    
+
     const cloned = { ...obj } as any;
     for (const key in cloned) {
       cloned[key] = deepClone(cloned[key]);
@@ -91,6 +80,8 @@ const insertNode = (
   if (position === 'inside') {
     targetNode.children = targetNode.children || [];
     targetNode.children.unshift(nodeToInsert);
+
+    if (targetNode.isLeaf) targetNode.isLeaf = false;
   } else {
     if (position === 'before') {
       parentArray.splice(index, 0, nodeToInsert);
@@ -107,7 +98,6 @@ const isDescendantOf = (
   potentialAncestorId: TreeNodeId,
   data: TreeData
 ): boolean => {
-  // ... (Sua implementação de isDescendantOf)
   const findNode = (nodes: TreeData, id: TreeNodeId): TreeNode | null => {
     for (const node of nodes) {
       if (node.id === id) return node;
@@ -131,10 +121,6 @@ const isDescendantOf = (
   return startNode ? checkDescendants(startNode) : false;
 };
 
-// ====================================================================
-// HOOK PRINCIPAL
-// ====================================================================
-
 export interface UseDragDropResult {
   activeId: TreeNodeId | null;
   overId: TreeNodeId | null;
@@ -156,7 +142,7 @@ export const useDragDrop = (): UseDragDropResult => {
     setOverId(null);
     setDropPosition(null);
   }, []);
-  
+
   const handleDragStart = useCallback((id: TreeNodeId) => {
     setActiveId(id);
   }, []);
@@ -166,18 +152,14 @@ export const useDragDrop = (): UseDragDropResult => {
     setDropPosition(position);
   }, []);
 
-  // Regra de Dropar: Mantida do seu snippet original
   const canDrop = useCallback((draggedId: TreeNodeId, targetId: TreeNodeId, data: TreeData): boolean => {
-    // Não pode dropar em si mesmo
     if (draggedId === targetId) return false;
 
-    // Não pode dropar pai dentro de filho (evitar ciclo)
     if (isDescendantOf(targetId, draggedId, data)) return false;
 
     return true;
   }, []);
 
-  // 🔑 Lógica final do Drag & Drop: Corrigida para usar os helpers robustos
   const handleDragEnd = useCallback((data: TreeData, onUpdate: (newData: TreeData) => void) => {
     if (!activeId || !overId || !dropPosition) {
       handleDragCancel();
@@ -189,7 +171,6 @@ export const useDragDrop = (): UseDragDropResult => {
       return;
     }
 
-    // 1. Remove o nó da posição original (Imutável)
     const { newData: intermediateData, removedNode } = removeNode(data, activeId);
 
     if (!removedNode) {
@@ -197,10 +178,8 @@ export const useDragDrop = (): UseDragDropResult => {
       return;
     }
 
-    // 2. Insere na nova posição (Imutável)
     const finalData = insertNode(intermediateData, overId, removedNode, dropPosition);
 
-    // 3. Atualiza o estado (useTreeState vai receber o novo array)
     onUpdate(finalData);
     handleDragCancel();
   }, [activeId, overId, dropPosition, canDrop, handleDragCancel]);

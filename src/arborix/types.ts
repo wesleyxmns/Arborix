@@ -1,6 +1,37 @@
-import type { EventEmitter } from 'eventemitter3';
+import type EventEmitter from 'eventemitter3';
 import { z } from 'zod';
 import { VisibleNode } from './utils/flattenTree';
+import { ContextMenuItem } from './components/ContextMenu/ContextMenu';
+
+export interface ArborixProps {
+  data: TreeData;
+  persistenceKey?: string;
+  height?: number;
+  rowHeight?: number;
+  showCheckboxes?: boolean;
+  enableDragDrop?: boolean;
+  enableSearch?: boolean;
+  enableInlineEdit?: boolean;
+  enableContextMenu?: boolean;
+  filterFn?: FilterFn;
+  plugins?: TreePlugin[];
+  renderNode?: (node: any) => React.ReactNode;
+  onDataChange?: (data: TreeData) => void;
+  onLoadData?: (node: TreeNode) => Promise<TreeNode[] | void>;
+
+  // Context Menu Customization
+  contextMenuOptions?: {
+    rename?: boolean;
+    duplicate?: boolean;
+    cut?: boolean;
+    copy?: boolean;
+    paste?: boolean;
+    addChild?: boolean;
+    addSibling?: boolean;
+    delete?: boolean;
+  };
+  customContextMenuItems?: (node: TreeNode) => ContextMenuItem[];
+}
 
 export type TreeNodeId = string | number;
 
@@ -20,7 +51,6 @@ export interface TreeNode {
 
 export type TreeData = TreeNode[];
 
-// Estado interno completo
 export interface TreeState {
   data: TreeData;
   openIds: Set<TreeNodeId>;
@@ -34,7 +64,6 @@ export interface TreeState {
 export type SelectionMode = 'none' | 'single' | 'multiple';
 export type CheckMode = 'independent' | 'tri-state';
 
-// Drag & Drop types
 export type DropPosition = 'before' | 'after' | 'inside';
 
 export interface DragDropEvent {
@@ -62,8 +91,6 @@ export type FlatNode = TreeNode & {
   index: number;
 };
 
-
-// O nó com as propriedades geométricas calculadas
 export interface CalculatedNode extends VisibleNode {
   x: number;
   y: number;
@@ -71,7 +98,6 @@ export interface CalculatedNode extends VisibleNode {
   height: number;
 }
 
-// Props do novo Hook de Layout
 export interface UseTreeLayoutProps {
   data: TreeData;
   openIds: Set<TreeNodeId>;
@@ -79,26 +105,25 @@ export interface UseTreeLayoutProps {
   rowHeight: number;
   containerWidth: number;
   containerHeight: number;
-  indentation?: number; // Ex: 20px
+  indentation?: number;
   scrollTop: number;
 }
 
-// Resultado do Hook
 export interface UseTreeLayoutResult {
   calculatedNodes: CalculatedNode[];
   totalWidth: number;
   totalHeight: number;
-  isVertical: boolean; // Para o Arborix.tsx tomar decisões D&D/Sortable
+  isVertical: boolean;
 }
 
-// Schema com lazy correto (sem erro circular)
 export const NodeSchema: z.ZodType<TreeNode> = z.object({
   id: z.union([z.string(), z.number()]),
   label: z.string(),
   children: z.array(z.lazy(() => NodeSchema)).optional(),
   isOpen: z.boolean().optional(),
   isLoading: z.boolean().optional(),
-  isLeaf: z.boolean().optional(), // <--- NOVO
+  isLeaf: z.boolean().optional(),
   disabled: z.boolean().optional(),
   metadata: z.record(z.any()).optional(),
 }).passthrough();
+

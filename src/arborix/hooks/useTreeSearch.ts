@@ -1,18 +1,13 @@
-// src/arborix/hooks/useTreeSearch.ts
 import { useCallback, useMemo, useState } from 'react';
 import type { TreeNode, TreeNodeId } from '../types';
 
-interface SearchResult {
+export interface SearchResult {
   nodeId: TreeNodeId;
   node: TreeNode;
   score: number;
   matchIndices: number[];
 }
 
-/**
- * Implementação de busca fuzzy simples
- * Retorna um score de 0-1 e os índices das letras que deram match
- */
 function fuzzyMatch(pattern: string, text: string): { score: number; indices: number[] } | null {
   pattern = pattern.toLowerCase();
   text = text.toLowerCase();
@@ -27,7 +22,7 @@ function fuzzyMatch(pattern: string, text: string): { score: number; indices: nu
     if (pattern[patternIdx] === text[textIdx]) {
       indices.push(textIdx);
       consecutiveMatches++;
-      score += 1 + consecutiveMatches * 0.5; // Bonus por matches consecutivos
+      score += 1 + consecutiveMatches * 0.5;
       patternIdx++;
     } else {
       consecutiveMatches = 0;
@@ -35,20 +30,15 @@ function fuzzyMatch(pattern: string, text: string): { score: number; indices: nu
     textIdx++;
   }
 
-  // Se não encontrou todas as letras do pattern, não é match
   if (patternIdx !== pattern.length) {
     return null;
   }
 
-  // Normaliza o score (0-1)
   const normalizedScore = score / (pattern.length * 2);
 
   return { score: normalizedScore, indices };
 }
 
-/**
- * Encontra todos os nós que dão match com o pattern
- */
 function searchTree(nodes: TreeNode[], pattern: string, parentPath: TreeNodeId[] = []): SearchResult[] {
   const results: SearchResult[] = [];
 
@@ -64,7 +54,6 @@ function searchTree(nodes: TreeNode[], pattern: string, parentPath: TreeNodeId[]
       });
     }
 
-    // Busca recursivamente nos filhos
     if (node.children && node.children.length > 0) {
       const childResults = searchTree(node.children, pattern, [...parentPath, node.id]);
       results.push(...childResults);
@@ -74,9 +63,6 @@ function searchTree(nodes: TreeNode[], pattern: string, parentPath: TreeNodeId[]
   return results;
 }
 
-/**
- * Encontra todos os IDs de nós pais que devem ser expandidos
- */
 function findParentIds(nodes: TreeNode[], targetId: TreeNodeId, currentPath: TreeNodeId[] = []): TreeNodeId[] | null {
   for (const node of nodes) {
     if (node.id === targetId) {
@@ -108,7 +94,6 @@ export function useTreeSearch(
   const [searchQuery, setSearchQuery] = useState('');
   const [currentResultIndex, setCurrentResultIndex] = useState(0);
 
-  // Resultados da busca ordenados por score
   const searchResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < minSearchLength) {
       return [];
@@ -118,13 +103,11 @@ export function useTreeSearch(
     return results.sort((a, b) => b.score - a.score);
   }, [nodes, searchQuery, minSearchLength]);
 
-  // IDs dos nós que deram match
   const matchedNodeIds = useMemo(
     () => new Set(searchResults.map(r => r.nodeId)),
     [searchResults]
   );
 
-  // IDs dos nós que devem ser expandidos
   const nodesToExpand = useMemo(() => {
     if (!autoExpand || searchResults.length === 0) {
       return new Set<TreeNodeId>();
@@ -142,34 +125,28 @@ export function useTreeSearch(
     return expandIds;
   }, [nodes, searchResults, autoExpand]);
 
-  // Nó atual selecionado na navegação
   const currentResult = searchResults[currentResultIndex] || null;
 
-  // Navega para o próximo resultado
   const nextResult = useCallback(() => {
     if (searchResults.length === 0) return;
     setCurrentResultIndex((prev) => (prev + 1) % searchResults.length);
   }, [searchResults.length]);
 
-  // Navega para o resultado anterior
   const previousResult = useCallback(() => {
     if (searchResults.length === 0) return;
     setCurrentResultIndex((prev) => (prev - 1 + searchResults.length) % searchResults.length);
   }, [searchResults.length]);
 
-  // Limpa a busca
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     setCurrentResultIndex(0);
   }, []);
 
-  // Atualiza a query de busca
   const search = useCallback((query: string) => {
     setSearchQuery(query);
     setCurrentResultIndex(0);
   }, []);
 
-  // Pega os índices de highlight para um nó específico
   const getHighlightIndices = useCallback(
     (nodeId: TreeNodeId): number[] => {
       const result = searchResults.find(r => r.nodeId === nodeId);

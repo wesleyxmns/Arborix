@@ -22,7 +22,6 @@ export const flattenVisibleTree = (
       result.push({ node, depth, index: result.length, parentId, isLastChild: isLast });
 
       if (node.children && openSet.has(node.id)) {
-        // Chamada recursiva ajustada (quarto argumento removido)
         walk(node.children, depth + 1, node.id);
       }
     });
