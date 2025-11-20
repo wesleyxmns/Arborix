@@ -9,6 +9,8 @@ import { TreeToolbar } from './components/TreeToolbar/TreeToolbar';
 import { useArborix } from './hooks/useArborix';
 import type { ArborixProps, TreeNodeId } from './types';
 
+export type { ArborixProps };
+
 export const Arborix: React.FC<ArborixProps> = (props) => {
   const {
     height = 600,
