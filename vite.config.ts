@@ -8,18 +8,13 @@ export default defineConfig({
     react(),
     dts({
       insertTypesEntry: true,
-      include: ['src/**/*.ts', 'src/**/*.tsx'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'node_modules'],
+      include: ['src'],
       outDir: 'dist/types',
       rollupTypes: true,
-      tsconfigPath: './tsconfig.json',
+      copyDtsFiles: true,
+      staticImport: true,
     }),
   ],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-    },
-  },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
@@ -51,9 +46,7 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          'react/jsx-runtime': 'jsxRuntime'
-        },
-        exports: 'named',
+        }
       }
     },
     sourcemap: true,
