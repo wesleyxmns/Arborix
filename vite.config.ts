@@ -8,11 +8,12 @@ export default defineConfig({
     react(),
     dts({
       insertTypesEntry: true,
-      include: ['src'],
+      include: ['src/**/*'],
       outDir: 'dist/types',
-      rollupTypes: true,
+      rollupTypes: false, // ← MUDANÇA AQUI
       copyDtsFiles: true,
       staticImport: true,
+      entryRoot: 'src',
     }),
   ],
   build: {
@@ -46,7 +47,8 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-        }
+        },
+        preserveModules: false, // Mantenha como false para bundle único
       }
     },
     sourcemap: true,
