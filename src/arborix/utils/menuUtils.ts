@@ -4,16 +4,17 @@ import { UseTreeClipboardResult } from '../hooks/useTreeClipboard';
 
 interface GetContextMenuItemsParams {
   nodeId: TreeNodeId;
+  targetIds?: TreeNodeId[];
   data: TreeData;
   findNode: (data: TreeData, id: TreeNodeId) => TreeNode | null;
   findParent: (data: TreeData, id: TreeNodeId) => TreeNode | null;
   startEditing: (id: TreeNodeId) => void;
-  duplicateNode: (id: TreeNodeId) => void;
-  cutNode: (id: TreeNodeId) => void;
-  copyNode: (id: TreeNodeId) => void;
+  duplicateNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  cutNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  copyNode: (id: TreeNodeId | TreeNodeId[]) => void;
   pasteNode: (targetId: TreeNodeId) => void;
   addNode: (parentId: TreeNodeId | null, label: string) => void;
-  deleteNode: (id: TreeNodeId) => void;
+  deleteNode: (id: TreeNodeId | TreeNodeId[]) => void;
   clipboard: UseTreeClipboardResult['clipboard'];
   options?: ArborixProps['contextMenuOptions'];
   customItems?: ArborixProps['customContextMenuItems'];
@@ -21,6 +22,7 @@ interface GetContextMenuItemsParams {
 
 export const getContextMenuItems = ({
   nodeId,
+  targetIds,
   data,
   findNode,
   findParent,
@@ -47,6 +49,9 @@ export const getContextMenuItems = ({
   const node = findNode(data, nodeId);
   if (!node) return [];
 
+  const effectiveTargetIds = targetIds && targetIds.length > 0 ? targetIds : [nodeId];
+  const isMultiSelection = effectiveTargetIds.length > 1;
+
   const parent = findParent(data, nodeId);
   const items: ContextMenuItem[] = [];
 
@@ -62,7 +67,7 @@ export const getContextMenuItems = ({
     ...options,
   };
 
-  if (defaults.rename) {
+  if (defaults.rename && !isMultiSelection) {
     items.push({
       id: 'rename',
       label: 'Renomear',
@@ -75,30 +80,30 @@ export const getContextMenuItems = ({
   if (defaults.duplicate) {
     items.push({
       id: 'duplicate',
-      label: 'Duplicar',
+      label: isMultiSelection ? `Duplicar (${effectiveTargetIds.length})` : 'Duplicar',
       shortcutLabel: 'Ctrl+D',
       icon: ContextMenuIcons.Copy,
-      action: () => duplicateNode(nodeId),
+      action: () => duplicateNode(effectiveTargetIds),
     });
   }
 
   if (defaults.cut) {
     items.push({
       id: 'cut',
-      label: 'Recortar',
+      label: isMultiSelection ? `Recortar (${effectiveTargetIds.length})` : 'Recortar',
       shortcutLabel: 'Ctrl+X',
       icon: ContextMenuIcons.Cut,
-      action: () => cutNode(nodeId),
+      action: () => cutNode(effectiveTargetIds),
     });
   }
 
   if (defaults.copy) {
     items.push({
       id: 'copy',
-      label: 'Copiar',
+      label: isMultiSelection ? `Copiar (${effectiveTargetIds.length})` : 'Copiar',
       shortcutLabel: 'Ctrl+C',
       icon: ContextMenuIcons.Copy,
-      action: () => copyNode(nodeId),
+      action: () => copyNode(effectiveTargetIds),
     });
   }
 
@@ -150,11 +155,11 @@ export const getContextMenuItems = ({
     if (items.length > 0) items.push({ id: 'sep-delete', label: '', separator: true });
     items.push({
       id: 'delete',
-      label: 'Excluir',
+      label: isMultiSelection ? `Excluir (${effectiveTargetIds.length})` : 'Excluir',
       shortcutLabel: 'Del',
       icon: ContextMenuIcons.Delete,
       danger: true,
-      action: () => deleteNode(nodeId),
+      action: () => deleteNode(effectiveTargetIds),
     });
   }
 

@@ -65,6 +65,7 @@ export const useArborix = (props: ArborixProps) => {
     editingNodeId,
     startEditing,
     addNode,
+    insertNode,
     deleteNode,
     duplicateNode,
     findNode,
@@ -73,6 +74,8 @@ export const useArborix = (props: ArborixProps) => {
     setNodeChildren,
     focusedNodeId,
     setFocus,
+    setCutNodes,
+    clearCutNodes,
     getState,
     updateState
   } = stateHook;
@@ -85,10 +88,12 @@ export const useArborix = (props: ArborixProps) => {
 
   const clipboardHook = useTreeClipboard({
     data: state.data,
-    addNode,
+    insertNode,
     deleteNode,
     findNode,
     commit,
+    setCutNodes,
+    clearCutNodes,
   });
   const { clipboard, cutNode, copyNode, pasteNode } = clipboardHook;
 
@@ -226,8 +231,14 @@ export const useArborix = (props: ArborixProps) => {
 
   const handleNodeContextMenu = (e: React.MouseEvent, nodeId: TreeNodeId) => {
     if (!enableContextMenu) return;
+
+    const targetIds = state.selectedIds.has(nodeId)
+      ? Array.from(state.selectedIds)
+      : [nodeId];
+
     const items = getContextMenuItems({
       nodeId,
+      targetIds,
       data: state.data,
       findNode,
       findParent,
@@ -267,6 +278,7 @@ export const useArborix = (props: ArborixProps) => {
     handleDrop,
     handleNodeContextMenu,
     getHighlightIndices,
+    clearSelection,
 
     sensors,
     dndConfig: {

@@ -1,7 +1,7 @@
+import { Virtualizer } from '@tanstack/react-virtual';
 import { useEffect } from 'react';
 import { TreeNodeId } from '../types';
 import { VisibleNode } from '../utils/flattenTree';
-import { Virtualizer } from '@tanstack/react-virtual';
 
 export interface UseTreeKeyboardProps {
   focusedNodeId: TreeNodeId | null;
@@ -18,10 +18,10 @@ export interface UseTreeKeyboardProps {
   canUndo: boolean;
   canRedo: boolean;
   startEditing: (id: TreeNodeId) => void;
-  deleteNode: (id: TreeNodeId) => void;
-  duplicateNode: (id: TreeNodeId) => void;
-  cutNode: (id: TreeNodeId) => void;
-  copyNode: (id: TreeNodeId) => void;
+  deleteNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  duplicateNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  cutNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  copyNode: (id: TreeNodeId | TreeNodeId[]) => void;
   pasteNode: (targetId: TreeNodeId | null) => void;
   setFocus: (id: TreeNodeId) => void;
   selectNode: (id: TreeNodeId, multi?: boolean, range?: boolean, visibleNodes?: TreeNodeId[]) => void;
@@ -84,7 +84,7 @@ export const useTreeKeyboard = ({
 
       if (e.key === 'Delete' && selectedIds.size > 0) {
         e.preventDefault();
-        selectedIds.forEach(id => deleteNode(id));
+        deleteNode(Array.from(selectedIds));
       }
 
       if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
@@ -95,22 +95,19 @@ export const useTreeKeyboard = ({
         }
       }
 
-      if ((e.metaKey || e.ctrlKey) && e.key === 'd' && selectedIds.size === 1) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd' && selectedIds.size > 0) {
         e.preventDefault();
-        const selectedId = Array.from(selectedIds)[0];
-        duplicateNode(selectedId);
+        duplicateNode(Array.from(selectedIds));
       }
 
-      if ((e.metaKey || e.ctrlKey) && e.key === 'x' && selectedIds.size === 1) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'x' && selectedIds.size > 0) {
         e.preventDefault();
-        const selectedId = Array.from(selectedIds)[0];
-        cutNode(selectedId);
+        cutNode(Array.from(selectedIds));
       }
 
-      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && selectedIds.size === 1) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && selectedIds.size > 0) {
         e.preventDefault();
-        const selectedId = Array.from(selectedIds)[0];
-        copyNode(selectedId);
+        copyNode(Array.from(selectedIds));
       }
 
       if ((e.metaKey || e.ctrlKey) && e.key === 'v' && clipboard) {
