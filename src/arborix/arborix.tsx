@@ -1,6 +1,6 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ContextMenu } from './components/ContextMenu/ContextMenu';
 import { NodeRenderer } from './components/NodeRenderer/NodeRenderer';
@@ -50,9 +50,8 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
     sortableConfig,
   } = useArborix(props);
 
-  const {
-    undo, redo, canUndo, canRedo, addNode, startEditing, saveEdit, cancelEditing,
-    selectNode, toggleCheck, getCheckState, setFocus, editingNodeId, focusedNodeId
+  const { undo, redo, canUndo, canRedo, addNode, startEditing, saveEdit, cancelEditing,
+    selectNode, toggleCheck, getCheckState, setFocus, editingNodeId, focusedNodeId, clearSelection
   } = stateHook;
 
   const { activeId, overId, dropPosition, handleDragStart, handleDragOver, handleDragCancel } = dragDropHook;
@@ -64,6 +63,19 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
   } = searchHook;
 
   const { handleTreeNavigation } = keyboardHook;
+
+  // Click outside to deselect
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const treeContainer = document.getElementById('arborix-scroll-container');
+      if (treeContainer && !treeContainer.contains(e.target as Node)) {
+        clearSelection();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [clearSelection]);
 
   return (
     <div className="flex flex-col gap-2">

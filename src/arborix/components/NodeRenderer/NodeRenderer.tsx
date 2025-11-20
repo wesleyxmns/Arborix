@@ -170,7 +170,7 @@ export const NodeRenderer = ({
         aria-posinset={ariaPosInSet}
         tabIndex={isFocused ? 0 : -1}
 
-        className={`flex items-center gap-2 py-1 px-2 rounded transition-all outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
+        className={`group flex items-center gap-2 py-1 px-2 rounded transition-all outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
           } ${isDragging || isBeingDragged ? 'shadow-lg opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-300' : ''
           } ${isCurrentResult ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${isMatched && !isCurrentResult ? 'bg-yellow-50' : ''
           } ${isEditing ? 'ring-2 ring-green-400 bg-green-50' : 'cursor-pointer'}`}

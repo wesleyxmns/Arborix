@@ -199,6 +199,24 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     setLastSelectedId(id);
   }, [lastSelectedId]);
 
+  const selectAllNodes = useCallback((allIds: TreeNodeId[]) => {
+    setState(prev => ({
+      ...prev,
+      selectedIds: new Set(allIds),
+    }));
+    if (allIds.length > 0) {
+      setLastSelectedId(allIds[allIds.length - 1]);
+    }
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      selectedIds: new Set(),
+    }));
+    setLastSelectedId(null);
+  }, []);
+
   const updateCheckStates = useCallback((data: TreeData, checkedIds: Set<TreeNodeId>) => {
     const partialCheckedIds = new Set<TreeNodeId>();
 
@@ -492,6 +510,8 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     setFocus,
     toggleOpen,
     selectNode,
+    selectAllNodes,
+    clearSelection,
     toggleCheck,
     getCheckState,
     setData,

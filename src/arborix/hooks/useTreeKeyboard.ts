@@ -24,7 +24,8 @@ export interface UseTreeKeyboardProps {
   copyNode: (id: TreeNodeId) => void;
   pasteNode: (targetId: TreeNodeId | null) => void;
   setFocus: (id: TreeNodeId) => void;
-  selectNode: (id: TreeNodeId, multi: boolean) => void;
+  selectNode: (id: TreeNodeId, multi?: boolean, range?: boolean, visibleNodes?: TreeNodeId[]) => void;
+  selectAllNodes: (allIds: TreeNodeId[]) => void;
   toggleCheck: (id: TreeNodeId) => void;
   toggleOpen: (id: TreeNodeId) => void;
   handleToggle: (id: TreeNodeId) => void;
@@ -53,6 +54,7 @@ export const useTreeKeyboard = ({
   pasteNode,
   setFocus,
   selectNode,
+  selectAllNodes,
   toggleCheck,
   handleToggle,
   toggleOpen,
@@ -83,6 +85,14 @@ export const useTreeKeyboard = ({
       if (e.key === 'Delete' && selectedIds.size > 0) {
         e.preventDefault();
         selectedIds.forEach(id => deleteNode(id));
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+        e.preventDefault();
+        if (flatData.length > 0) {
+          const allNodeIds = flatData.map(item => item.node.id);
+          selectAllNodes(allNodeIds);
+        }
       }
 
       if ((e.metaKey || e.ctrlKey) && e.key === 'd' && selectedIds.size === 1) {
