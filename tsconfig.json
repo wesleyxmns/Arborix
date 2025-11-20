@@ -5,10 +5,8 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
     "noUnusedLocals": true,
@@ -21,11 +19,8 @@
     "types": ["node"],
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false, 
-    "sourceMap": true,
-    "outDir": "./dist/types",
-    "rootDir": "./src"
+    "sourceMap": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }
