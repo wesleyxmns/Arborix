@@ -19,6 +19,7 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
     enableSearch = true,
     enableInlineEdit = true,
     enableContextMenu = true,
+    showExpandButtons = false,
     renderNode,
     onLoadData,
   } = props;
@@ -172,6 +173,12 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                         const y = e.clientY - rect.top;
                         const height = rect.height;
 
+                        // Improved drop zones:
+                        // Top 25%: Before
+                        // Bottom 25%: After
+                        // Middle 50%: Inside (if it's a folder or we want to make it one)
+                        // For leaves, we might want to bias towards before/after unless hovering strictly over the center.
+
                         if (y < height * 0.25) {
                           handleDragOver(node.id, 'before');
                         } else if (y > height * 0.75) {
@@ -205,12 +212,14 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                       isCurrentResult={isCurrentResult}
                       highlightIndices={highlightIndices}
                       isEditing={isEditing}
+                      isCut={state.cutNodeIds.has(node.id)}
                       onStartEdit={enableInlineEdit ? () => startEditing(node.id) : undefined}
                       onSaveEdit={enableInlineEdit ? (newLabel) => saveEdit(node.id, newLabel) : undefined}
                       onCancelEdit={enableInlineEdit ? cancelEditing : undefined}
                       onContextMenu={enableContextMenu ? (e) => handleNodeContextMenu(e, node.id) : undefined}
                       canLoadData={!!onLoadData}
                       isFocused={isFocused}
+                      showExpandButtons={showExpandButtons}
                       ariaSetSize={ariaSetSize}
                       ariaPosInSet={ariaPosInSet}
                     />
@@ -218,6 +227,28 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                 );
               })}
             </div>
+            {/* Root Drop Zone */}
+            {enableDragDrop && activeId && (
+              <div
+                style={{
+                  height: '50px',
+                  marginTop: '10px',
+                  border: overId === 'root' ? '2px dashed #3b82f6' : '2px dashed transparent',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: overId === 'root' ? '#3b82f6' : '#9ca3af',
+                  transition: 'all 0.2s',
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  handleDragOver('root', 'inside');
+                }}
+              >
+                Mover para a Raiz
+              </div>
+            )}
           </div>
 
           <DragOverlay>

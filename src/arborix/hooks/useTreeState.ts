@@ -21,6 +21,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
       selectedIds: new Set<TreeNodeId>(),
       checkedIds: new Set<TreeNodeId>(),
       partialCheckedIds: new Set<TreeNodeId>(),
+      cutNodeIds: new Set<TreeNodeId>(),
       history: [initialData],
       historyIndex: 0,
     };
@@ -217,6 +218,20 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     setLastSelectedId(null);
   }, []);
 
+  const setCutNodes = useCallback((ids: Set<TreeNodeId>) => {
+    setState(prev => ({
+      ...prev,
+      cutNodeIds: ids,
+    }));
+  }, []);
+
+  const clearCutNodes = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      cutNodeIds: new Set(),
+    }));
+  }, []);
+
   const updateCheckStates = useCallback((data: TreeData, checkedIds: Set<TreeNodeId>) => {
     const partialCheckedIds = new Set<TreeNodeId>();
 
@@ -405,25 +420,57 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     return newNode.id;
   }, [commit]);
 
-  const deleteNode = useCallback((id: TreeNodeId) => {
+  const insertNode = useCallback((parentId: TreeNodeId | null, node: TreeNode) => {
     setState(prev => {
       const newData = produce(prev.data, (draft) => {
-        const removeNode = (nodes: TreeNode[]): boolean => {
-          const index = nodes.findIndex(n => n.id === id);
-          if (index !== -1) {
-            nodes.splice(index, 1);
-            return true;
-          }
+        if (parentId === null) {
+          draft.push(node);
+        } else {
+          const addToNode = (nodes: TreeNode[]): boolean => {
+            for (const n of nodes) {
+              if (n.id === parentId) {
+                if (!n.children) n.children = [];
+                n.children.push(node);
+                return true;
+              }
+              if (n.children && addToNode(n.children)) {
+                return true;
+              }
+            }
+            return false;
+          };
+          addToNode(draft);
+        }
+      });
 
-          for (const node of nodes) {
-            if (node.children && removeNode(node.children)) {
-              return true;
+      const newOpenIds = new Set(prev.openIds);
+      if (parentId !== null) {
+        newOpenIds.add(parentId);
+      }
+
+      return { ...prev, data: newData, openIds: newOpenIds };
+    });
+    commit();
+  }, [commit]);
+
+  const deleteNode = useCallback((ids: TreeNodeId | TreeNodeId[]) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    if (idList.length === 0) return;
+
+    setState(prev => {
+      const newData = produce(prev.data, (draft) => {
+        const removeNodes = (nodes: TreeNode[]) => {
+          for (let i = nodes.length - 1; i >= 0; i--) {
+            const node = nodes[i];
+            if (idList.includes(node.id)) {
+              nodes.splice(i, 1);
+            } else if (node.children) {
+              removeNodes(node.children);
             }
           }
-          return false;
         };
 
-        removeNode(draft);
+        removeNodes(draft);
       });
 
       const newSelectedIds = new Set(prev.selectedIds);
@@ -431,10 +478,12 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
       const newPartialCheckedIds = new Set(prev.partialCheckedIds);
       const newOpenIds = new Set(prev.openIds);
 
-      newSelectedIds.delete(id);
-      newCheckedIds.delete(id);
-      newPartialCheckedIds.delete(id);
-      newOpenIds.delete(id);
+      idList.forEach(id => {
+        newSelectedIds.delete(id);
+        newCheckedIds.delete(id);
+        newPartialCheckedIds.delete(id);
+        newOpenIds.delete(id);
+      });
 
       return {
         ...prev,
@@ -449,51 +498,40 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     commit();
   }, [commit]);
 
-  const duplicateNode = useCallback((id: TreeNodeId) => {
+  const duplicateNode = useCallback((ids: TreeNodeId | TreeNodeId[]) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    if (idList.length === 0) return;
+
     setState(prev => {
-      const node = findNode(prev.data, id);
-      if (!node) return prev;
-
-      const parent = findParent(prev.data, id);
-
-      const deepClone = (n: TreeNode): TreeNode => ({
-        ...n,
-        id: `${n.id}-copy-${Date.now()}`,
-        children: n.children?.map(deepClone),
-      });
-
-      const clonedNode = deepClone(node);
-
       const newData = produce(prev.data, (draft) => {
-        if (parent === null) {
-          const index = draft.findIndex(n => n.id === id);
-          draft.splice(index + 1, 0, clonedNode);
-        } else {
-          const addSibling = (nodes: TreeNode[]): boolean => {
-            for (const n of nodes) {
-              if (n.children) {
-                const index = n.children.findIndex(child => child.id === id);
-                if (index !== -1) {
-                  n.children.splice(index + 1, 0, clonedNode);
-                  return true;
-                }
-                if (addSibling(n.children)) {
-                  return true;
-                }
-              }
-            }
-            return false;
-          };
+        const deepClone = (n: TreeNode): TreeNode => ({
+          ...n,
+          id: `${n.id}-copy-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          children: n.children?.map(deepClone),
+        });
 
-          addSibling(draft);
-        }
+        const processNodes = (nodes: TreeNode[]) => {
+          for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            if (idList.includes(node.id)) {
+              const clonedNode = deepClone(node);
+              nodes.splice(i + 1, 0, clonedNode);
+              i++; // Skip the newly added node
+            }
+            if (node.children) {
+              processNodes(node.children);
+            }
+          }
+        };
+
+        processNodes(draft);
       });
 
       return { ...prev, data: newData };
     });
 
     commit();
-  }, [findNode, findParent, commit]);
+  }, [commit]);
 
   const canUndo = state.historyIndex > 0;
   const canRedo = state.historyIndex < state.history.length - 1;
@@ -512,6 +550,8 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     selectNode,
     selectAllNodes,
     clearSelection,
+    setCutNodes,
+    clearCutNodes,
     toggleCheck,
     getCheckState,
     setData,
@@ -525,6 +565,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     cancelEditing,
     saveEdit,
     addNode,
+    insertNode,
     deleteNode,
     duplicateNode,
     findNode,

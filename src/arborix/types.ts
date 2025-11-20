@@ -13,6 +13,7 @@ export interface ArborixProps {
   enableSearch?: boolean;
   enableInlineEdit?: boolean;
   enableContextMenu?: boolean;
+  showExpandButtons?: boolean;
   filterFn?: FilterFn;
   plugins?: TreePlugin[];
   renderNode?: (node: any) => React.ReactNode;
@@ -57,6 +58,7 @@ export interface TreeState {
   selectedIds: Set<TreeNodeId>;
   checkedIds: Set<TreeNodeId>;
   partialCheckedIds: Set<TreeNodeId>;
+  cutNodeIds: Set<TreeNodeId>;
   history: TreeData[];
   historyIndex: number;
 }

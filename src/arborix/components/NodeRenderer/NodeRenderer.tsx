@@ -28,16 +28,16 @@ export interface NodeRendererProps {
   isCurrentResult?: boolean;
   highlightIndices?: number[];
   isEditing?: boolean;
+  isCut?: boolean;
   onStartEdit?: () => void;
   onSaveEdit?: (newLabel: string) => void;
   onCancelEdit?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
   canLoadData?: boolean;
-
   isFocused?: boolean;
+  showExpandButtons?: boolean;
   ariaSetSize?: number;
   ariaPosInSet?: number;
-
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }
@@ -61,11 +61,13 @@ export const NodeRenderer = ({
   isCurrentResult = false,
   highlightIndices = [],
   isEditing = false,
+  isCut = false,
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
   onContextMenu,
   isFocused = false,
+  showExpandButtons = false,
   ariaSetSize,
   ariaPosInSet,
 }: NodeRendererProps) => {
@@ -171,7 +173,7 @@ export const NodeRenderer = ({
         tabIndex={isFocused ? 0 : -1}
 
         className={`group flex items-center gap-2 py-1 px-2 rounded transition-all outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
-          } ${isDragging || isBeingDragged ? 'shadow-lg opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-300' : ''
+          } ${isDragging || isBeingDragged ? 'shadow-lg opacity-50' : ''} ${isCut ? 'opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-300' : ''
           } ${isCurrentResult ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${isMatched && !isCurrentResult ? 'bg-yellow-50' : ''
           } ${isEditing ? 'ring-2 ring-green-400 bg-green-50' : 'cursor-pointer'}`}
 
@@ -209,7 +211,7 @@ export const NodeRenderer = ({
           <div className="p-1 flex items-center justify-center">
             <Loader2 size={16} className="animate-spin text-blue-500" />
           </div>
-        ) : hasChildren ? (
+        ) : hasChildren && showExpandButtons ? (
           <button
             onClick={(e) => {
               e.stopPropagation();

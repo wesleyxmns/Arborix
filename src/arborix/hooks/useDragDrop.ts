@@ -71,6 +71,14 @@ const insertNode = (
   };
 
   const newData = deepClone(data);
+
+  if (targetId === 'root') {
+    if (position === 'inside') { // Should typically be 'inside' or 'after' for root drop
+      newData.push(nodeToInsert);
+    }
+    return newData;
+  }
+
   const targetInfo = findNodeAndParent(newData, targetId);
 
   if (!targetInfo) return newData;
@@ -154,6 +162,7 @@ export const useDragDrop = (): UseDragDropResult => {
 
   const canDrop = useCallback((draggedId: TreeNodeId, targetId: TreeNodeId, data: TreeData): boolean => {
     if (draggedId === targetId) return false;
+    if (targetId === 'root') return true;
 
     if (isDescendantOf(targetId, draggedId, data)) return false;
 

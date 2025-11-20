@@ -3,69 +3,112 @@ import { TreeNode, TreeNodeId, TreeData } from '../types';
 
 export interface UseTreeClipboardProps {
   data: TreeData;
-  addNode: (parentId: TreeNodeId | null, label: string) => TreeNodeId;
-  deleteNode: (id: TreeNodeId) => void;
+  insertNode: (parentId: TreeNodeId | null, node: TreeNode) => void;
+  deleteNode: (id: TreeNodeId | TreeNodeId[]) => void;
   findNode: (data: TreeData, id: TreeNodeId) => TreeNode | null;
   commit: () => void;
+  setCutNodes: (ids: Set<TreeNodeId>) => void;
+  clearCutNodes: () => void;
 }
 
 export interface UseTreeClipboardResult {
-  clipboard: { node: TreeNode; mode: 'cut' | 'copy' } | null;
-  cutNode: (id: TreeNodeId) => void;
-  copyNode: (id: TreeNodeId) => void;
+  clipboard: { nodes: TreeNode[]; mode: 'cut' | 'copy' } | null;
+  cutNode: (id: TreeNodeId | TreeNodeId[]) => void;
+  copyNode: (id: TreeNodeId | TreeNodeId[]) => void;
   pasteNode: (targetId: TreeNodeId | null) => void;
 }
 
 export const useTreeClipboard = ({
   data,
-  addNode,
+  insertNode,
   deleteNode,
   findNode,
   commit,
+  setCutNodes,
+  clearCutNodes,
 }: UseTreeClipboardProps): UseTreeClipboardResult => {
   const [clipboard, setClipboard] = useState<{
-    node: TreeNode;
+    nodes: TreeNode[];
     mode: 'cut' | 'copy';
   } | null>(null);
 
-  const cutNode = useCallback((id: TreeNodeId) => {
-    const node = findNode(data, id);
-    if (node) {
-      setClipboard({ node, mode: 'cut' });
-    }
-  }, [data, findNode]);
+  const cutNode = useCallback((ids: TreeNodeId | TreeNodeId[]) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const nodes: TreeNode[] = [];
+    const idsToCut = new Set<TreeNodeId>();
 
-  const copyNode = useCallback((id: TreeNodeId) => {
-    const node = findNode(data, id);
-    if (node) {
-      setClipboard({ node, mode: 'copy' });
+    idList.forEach(id => {
+      const node = findNode(data, id);
+      if (node) {
+        nodes.push(node);
+        const collectIds = (n: TreeNode) => {
+          idsToCut.add(n.id);
+          n.children?.forEach(collectIds);
+        };
+        collectIds(node);
+      }
+    });
+
+    if (nodes.length > 0) {
+      setClipboard({ nodes, mode: 'cut' });
+      setCutNodes(idsToCut);
     }
-  }, [data, findNode]);
+  }, [data, findNode, setCutNodes]);
+
+  const copyNode = useCallback((ids: TreeNodeId | TreeNodeId[]) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const nodes: TreeNode[] = [];
+
+    const deepClone = (n: TreeNode): TreeNode => ({
+      ...n,
+      children: n.children?.map(deepClone),
+    });
+
+    idList.forEach(id => {
+      const node = findNode(data, id);
+      if (node) {
+        nodes.push(deepClone(node));
+      }
+    });
+
+    if (nodes.length > 0) {
+      setClipboard({ nodes, mode: 'copy' });
+      clearCutNodes();
+    }
+  }, [data, findNode, clearCutNodes]);
 
   const pasteNode = useCallback((targetId: TreeNodeId | null) => {
     if (!clipboard) return;
 
+    const deepClone = (n: TreeNode): TreeNode => ({
+      ...n,
+      id: `${n.id}-paste-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      children: n.children?.map(deepClone),
+    });
+
     if (clipboard.mode === 'cut') {
-      deleteNode(clipboard.node.id);
+      // Delete original nodes
+      const idsToDelete = clipboard.nodes.map(n => n.id);
+      deleteNode(idsToDelete);
 
-      const newNode = { ...clipboard.node, id: Date.now().toString() };
-
-      addNode(targetId, newNode.label);
-
-      setClipboard(null);
-    } else {
-      const deepClone = (n: TreeNode): TreeNode => ({
-        ...n,
-        id: `${n.id}-paste-${Date.now()}`,
-        children: n.children?.map(deepClone),
+      // Insert new nodes
+      clipboard.nodes.forEach(node => {
+        const newNode = deepClone(node);
+        insertNode(targetId, newNode);
       });
-
-      const clonedNode = deepClone(clipboard.node);
-      addNode(targetId, clonedNode.label);
+    } else {
+      clipboard.nodes.forEach(node => {
+        const clonedNode = deepClone(node);
+        insertNode(targetId, clonedNode);
+      });
     }
 
     commit();
-  }, [clipboard, deleteNode, addNode, commit]);
+    if (clipboard.mode === 'cut') {
+      setClipboard(null);
+      clearCutNodes();
+    }
+  }, [clipboard, deleteNode, insertNode, commit, clearCutNodes]);
 
   return {
     clipboard,

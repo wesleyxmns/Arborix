@@ -9,7 +9,7 @@ export interface TreeToolbarProps {
   canRedo: boolean;
   onAddNode: () => void;
   clipboard: {
-    node: TreeNode;
+    nodes: TreeNode[];
     mode: 'cut' | 'copy';
   } | null;
   selectedCount: number;
@@ -69,8 +69,8 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
         <button
           onClick={onToggleDrag}
           className={`px-2 py-1 text-sm border rounded flex items-center gap-1 transition-colors ${isDragEnabled
-              ? 'bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200'
-              : 'hover:bg-gray-100 text-gray-500'
+            ? 'bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200'
+            : 'hover:bg-gray-100 text-gray-500'
             }`}
           title={isDragEnabled ? "Disable Drag & Drop" : "Enable Drag & Drop"}
         >
@@ -81,7 +81,7 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
 
       {clipboard && (
         <div className="text-xs text-gray-500 px-2 py-1 bg-blue-50 border border-blue-200 rounded">
-          {clipboard.mode === 'cut' ? '✂️' : '📋'} {clipboard.node.label}
+          {clipboard.mode === 'cut' ? '✂️' : '📋'} {clipboard.nodes.length} item(s)
         </div>
       )}
 
