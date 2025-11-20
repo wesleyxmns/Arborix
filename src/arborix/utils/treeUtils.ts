@@ -41,11 +41,9 @@ export const searchTree = (nodes: TreeNode[], query: string, fields: string[] = 
 
     if (matches) {
       result.push(node.id);
-      // Auto-expandir caminho inteiro
       let parent = node.parentId ?? null;
       while (parent !== null) {
         result.push(parent);
-        // parent é adicionado via referência no builder
       }
     }
 
@@ -58,17 +56,11 @@ export const searchTree = (nodes: TreeNode[], query: string, fields: string[] = 
 
 export const filterTreeData = (nodes: TreeNode[], predicate: FilterFn): TreeNode[] => {
   return nodes.reduce<TreeNode[]>((acc, node) => {
-    // Recursão: filtra os filhos primeiro
     const children = node.children ? filterTreeData(node.children, predicate) : [];
 
-    // O nó deve ser mantido se:
-    // 1. Ele satisfaz o predicado (ex: é uma pasta)
-    // 2. OU se ele tem filhos que satisfazem o predicado (para não deixar o filho órfão)
     if (predicate(node) || children.length > 0) {
       acc.push({
         ...node,
-        // Se tinha filhos originalmente, usa a lista filtrada (mesmo que vazia, para consistência)
-        // Se não tinha filhos, mantém undefined
         children: node.children ? children : undefined,
       });
     }

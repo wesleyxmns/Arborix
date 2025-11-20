@@ -32,11 +32,9 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
           const parsed = JSON.parse(saved);
           return {
             ...baseState,
-            // Recupera os Sets a partir dos arrays salvos
             openIds: new Set(parsed.openIds || []),
             selectedIds: new Set(parsed.selectedIds || []),
             checkedIds: new Set(parsed.checkedIds || []),
-            // Não persistimos histórico ou partialCheckedIds (recalculados)
           };
         }
       } catch (e) {
@@ -58,8 +56,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
   useEffect(() => {
     if (!persistenceKey) return;
 
-    // CORREÇÃO: Se for a primeira renderização, apenas marcamos como inicializado e retornamos.
-    // Isso evita gravar no localStorage o mesmo dado que acabamos de ler dele.
     if (!isInitialized.current) {
       isInitialized.current = true;
       return;
@@ -85,7 +81,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     setFocusedNodeId(id);
   }, []);
 
-  // Função auxiliar para encontrar nó
   const findNode = useCallback((data: TreeData, id: TreeNodeId): TreeNode | null => {
     for (const node of data) {
       if (node.id === id) return node;
@@ -97,7 +92,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     return null;
   }, []);
 
-  // Função auxiliar para encontrar pai
   const findParent = useCallback((data: TreeData, id: TreeNodeId, parent: TreeNode | null = null): TreeNode | null => {
     for (const node of data) {
       if (node.id === id) return parent;
@@ -109,7 +103,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     return null;
   }, []);
 
-  // Commit para histórico
   const commit = useCallback(() => {
     setState(prev => {
       const newHistory = prev.history.slice(0, prev.historyIndex + 1);
@@ -127,7 +120,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     });
   }, []);
 
-  // Undo
   const undo = useCallback(() => {
     setState(prev => {
       if (prev.historyIndex > 0) {
@@ -141,7 +133,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     });
   }, []);
 
-  // Redo
   const redo = useCallback(() => {
     setState(prev => {
       if (prev.historyIndex < prev.history.length - 1) {
@@ -155,7 +146,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     });
   }, []);
 
-  // Toggle Open
   const toggleOpen = useCallback((id: TreeNodeId) => {
     setState(prev => {
       const newOpenIds = new Set(prev.openIds);
@@ -168,22 +158,47 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     });
   }, []);
 
-  // Select Node
-  const selectNode = useCallback((id: TreeNodeId, clearOthers = false) => {
+  const [lastSelectedId, setLastSelectedId] = useState<TreeNodeId | null>(null);
+
+  const selectNode = useCallback((id: TreeNodeId, multi = false, range = false, visibleNodes: TreeNodeId[] = []) => {
     setState(prev => {
-      const newSelectedIds = clearOthers ? new Set([id]) : new Set(prev.selectedIds);
-      if (!clearOthers) {
+      let newSelectedIds: Set<TreeNodeId>;
+
+      if (range && lastSelectedId && visibleNodes.length > 0) {
+        const start = visibleNodes.indexOf(lastSelectedId);
+        const end = visibleNodes.indexOf(id);
+
+        if (start !== -1 && end !== -1) {
+          const [lower, upper] = start < end ? [start, end] : [end, start];
+          const rangeIds = visibleNodes.slice(lower, upper + 1);
+
+          // Se for multi, adiciona ao que já existe. Se não, substitui.
+          // Geralmente Shift+Click mantém a seleção anterior se Ctrl também estiver pressionado, 
+          // mas o padrão mais comum é estender a seleção a partir do último.
+          // Aqui vamos assumir que Shift estende a seleção atual.
+          newSelectedIds = new Set(prev.selectedIds);
+          rangeIds.forEach(rangeId => newSelectedIds.add(rangeId));
+        } else {
+          newSelectedIds = new Set([id]);
+        }
+      } else if (multi) {
+        newSelectedIds = new Set(prev.selectedIds);
         if (newSelectedIds.has(id)) {
           newSelectedIds.delete(id);
         } else {
           newSelectedIds.add(id);
         }
+      } else {
+        newSelectedIds = new Set([id]);
       }
+
       return { ...prev, selectedIds: newSelectedIds };
     });
-  }, []);
 
-  // Update check states (tri-state)
+    // Atualiza o último selecionado apenas se não for uma deseleção em modo multi
+    setLastSelectedId(id);
+  }, [lastSelectedId]);
+
   const updateCheckStates = useCallback((data: TreeData, checkedIds: Set<TreeNodeId>) => {
     const partialCheckedIds = new Set<TreeNodeId>();
 
@@ -202,14 +217,11 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
       }
 
       if (totalChecked === 0) {
-        // Nenhum filho marcado
         return { checked: 0, total: totalNodes };
       } else if (totalChecked === totalNodes) {
-        // Todos os filhos marcados
         checkedIds.add(node.id);
         return { checked: totalNodes, total: totalNodes };
       } else {
-        // Alguns filhos marcados (parcial)
         partialCheckedIds.add(node.id);
         return { checked: totalChecked, total: totalNodes };
       }
@@ -222,7 +234,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     return { checkedIds, partialCheckedIds };
   }, []);
 
-  // Toggle Check (tri-state)
   const toggleCheck = useCallback((id: TreeNodeId) => {
     setState(prev => {
       const node = findNode(prev.data, id);
@@ -231,7 +242,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
       const newCheckedIds = new Set(prev.checkedIds);
       const isCurrentlyChecked = newCheckedIds.has(id);
 
-      // Função para marcar/desmarcar todos os descendentes
       const toggleDescendants = (n: TreeNode, checked: boolean) => {
         if (checked) {
           newCheckedIds.add(n.id);
@@ -246,10 +256,8 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
         }
       };
 
-      // Toggle o nó atual e todos os seus descendentes
       toggleDescendants(node, !isCurrentlyChecked);
 
-      // Recalcula estados parciais
       const { checkedIds: updatedChecked, partialCheckedIds } = updateCheckStates(prev.data, newCheckedIds);
 
       return {
@@ -260,31 +268,24 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     });
   }, [findNode, updateCheckStates]);
 
-  // Get Check State
   const getCheckState = useCallback((id: TreeNodeId): 'checked' | 'unchecked' | 'indeterminate' => {
     if (state.checkedIds.has(id)) return 'checked';
     if (state.partialCheckedIds.has(id)) return 'indeterminate';
     return 'unchecked';
   }, [state.checkedIds, state.partialCheckedIds]);
 
-  // Set Data
   const setData = useCallback((newData: TreeData) => {
     setState(prev => ({ ...prev, data: newData }));
   }, []);
 
-  // **NOVA FUNCIONALIDADE: Edição Inline**
-
-  // Iniciar edição
   const startEditing = useCallback((id: TreeNodeId) => {
     setEditingNodeId(id);
   }, []);
 
-  // Cancelar edição
   const cancelEditing = useCallback(() => {
     setEditingNodeId(null);
   }, []);
 
-  // Salvar edição
   const saveEdit = useCallback((id: TreeNodeId, newLabel: string) => {
     if (!newLabel.trim()) {
       cancelEditing();
@@ -319,7 +320,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
   const setNodeLoading = useCallback((id: TreeNodeId, isLoading: boolean) => {
     setState(prev => {
       const newData = produce(prev.data, (draft) => {
-        const node = findNode(draft, id); // Reutilizando seu findNode interno
+        const node = findNode(draft, id);
         if (node) {
           node.isLoading = isLoading;
         }
@@ -334,17 +335,14 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
         const node = findNode(draft, parentId);
         if (node) {
           node.children = children;
-          node.isLoading = false; // Garante que pare o loading
-          // Se não tinha children array, agora tem
+          node.isLoading = false;
         }
       });
-      // Mantém histórico se necessário, ou commita
       return { ...prev, data: newData };
     });
-    commit(); // Salva no histórico para permitir Undo do carregamento
+    commit();
   }, [findNode, commit]);
 
-  // Adicionar nó
   const addNode = useCallback((parentId: TreeNodeId | null, label: string) => {
     const newNode: TreeNode = {
       id: Date.now().toString(),
@@ -355,10 +353,8 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     setState(prev => {
       const newData = produce(prev.data, (draft) => {
         if (parentId === null) {
-          // Adicionar na raiz
           draft.push(newNode);
         } else {
-          // Adicionar como filho
           const addToNode = (nodes: TreeNode[]): boolean => {
             for (const node of nodes) {
               if (node.id === parentId) {
@@ -379,7 +375,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
         }
       });
 
-      // Auto-expandir o pai se necessário
       const newOpenIds = new Set(prev.openIds);
       if (parentId !== null) {
         newOpenIds.add(parentId);
@@ -392,7 +387,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     return newNode.id;
   }, [commit]);
 
-  // Deletar nó
   const deleteNode = useCallback((id: TreeNodeId) => {
     setState(prev => {
       const newData = produce(prev.data, (draft) => {
@@ -414,7 +408,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
         removeNode(draft);
       });
 
-      // Limpar estados relacionados
       const newSelectedIds = new Set(prev.selectedIds);
       const newCheckedIds = new Set(prev.checkedIds);
       const newPartialCheckedIds = new Set(prev.partialCheckedIds);
@@ -438,7 +431,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     commit();
   }, [commit]);
 
-  // Duplicar nó
   const duplicateNode = useCallback((id: TreeNodeId) => {
     setState(prev => {
       const node = findNode(prev.data, id);
@@ -456,11 +448,9 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
 
       const newData = produce(prev.data, (draft) => {
         if (parent === null) {
-          // Adicionar na raiz
           const index = draft.findIndex(n => n.id === id);
           draft.splice(index + 1, 0, clonedNode);
         } else {
-          // Adicionar como irmão
           const addSibling = (nodes: TreeNode[]): boolean => {
             for (const n of nodes) {
               if (n.children) {
@@ -492,7 +482,6 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
 
   useEffect(() => {
     if (options.emitter) {
-      // Emite o estado atual (imutável) sempre que ele muda
       options.emitter.emit('state:change', state);
     }
   }, [state, options.emitter]);

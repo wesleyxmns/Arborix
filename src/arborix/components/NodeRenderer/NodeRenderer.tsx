@@ -3,7 +3,7 @@ import type { DraggableAttributes, } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronRight, Loader2, Minus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, Minus, MoreVertical } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { HighlightText } from '../HighlightText/HighlightText';
 
@@ -17,23 +17,20 @@ export interface NodeRendererProps {
   isSelected: boolean;
   checkState?: 'checked' | 'unchecked' | 'indeterminate';
   onToggle: () => void;
-  onSelect: () => void;
+  onSelect: (e: React.MouseEvent) => void;
   onCheck?: () => void;
   renderNode?: (node: TreeNode) => React.ReactNode;
   isDraggable?: boolean;
   isBeingDragged?: boolean;
   dropPosition?: DropPosition | null;
   onDropPositionChange?: (position: DropPosition | null) => void;
-  // Props de busca
   isMatched?: boolean;
   isCurrentResult?: boolean;
   highlightIndices?: number[];
-  // Props de edição
   isEditing?: boolean;
   onStartEdit?: () => void;
   onSaveEdit?: (newLabel: string) => void;
   onCancelEdit?: () => void;
-  // Props de context menu
   onContextMenu?: (e: React.MouseEvent) => void;
   canLoadData?: boolean;
 
@@ -101,7 +98,6 @@ export const NodeRenderer = ({
 
   const hasChildren = (node.children && node.children.length > 0) || (canLoadData && !node.isLeaf);
 
-  // Auto-focus no input quando entra em modo de edição
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -109,7 +105,6 @@ export const NodeRenderer = ({
     }
   }, [isEditing]);
 
-  // Reset edit value quando não está mais editando
   useEffect(() => {
     if (!isEditing) {
       setEditValue(node.label);
@@ -153,13 +148,12 @@ export const NodeRenderer = ({
 
   useEffect(() => {
     if (isFocused && !isDragging && !isEditing && nodeRef.current) {
-      nodeRef.current.focus({ preventScroll: true }); // O scroll é gerenciado pelo virtualizer
+      nodeRef.current.focus({ preventScroll: true });
     }
   }, [isFocused, isDragging, isEditing]);
 
   return (
-    <div className="relative">
-      {/* Drop indicator - BEFORE */}
+    <div className="relative group">
       {dropPosition === 'before' && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
       )}
@@ -174,7 +168,7 @@ export const NodeRenderer = ({
         aria-level={depth + 1}
         aria-setsize={ariaSetSize}
         aria-posinset={ariaPosInSet}
-        tabIndex={isFocused ? 0 : -1} // Roving TabIndex
+        tabIndex={isFocused ? 0 : -1}
 
         className={`flex items-center gap-2 py-1 px-2 rounded transition-all outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
           } ${isDragging || isBeingDragged ? 'shadow-lg opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-300' : ''
@@ -183,40 +177,34 @@ export const NodeRenderer = ({
 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        onClick={isEditing ? undefined : () => {
-          // Ao clicar, define foco também
-          onSelect();
+        onClick={isEditing ? undefined : (e) => {
+          onSelect(e);
         }}
         onDoubleClick={handleDoubleClick}
         onContextMenu={onContextMenu}
         onDragOver={(e) => handleDragOver(e, 'inside')}
         onDragLeave={handleDragLeave}
 
-        // Prevenir scroll padrão das setas quando focado
         onKeyDown={(e) => {
           if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             e.preventDefault();
           }
         }}
       >
-        {/* Drop zone - BEFORE (top 25%) */}
         <div
           className="absolute top-0 left-0 right-0 h-1/4"
           onDragOver={(e) => handleDragOver(e, 'before')}
           onDragLeave={handleDragLeave}
         />
 
-        {/* Drop zone - AFTER (bottom 25%) */}
         <div
           className="absolute bottom-0 left-0 right-0 h-1/4"
           onDragOver={(e) => handleDragOver(e, 'after')}
           onDragLeave={handleDragLeave}
         />
 
-        {/* Indentation */}
         <div style={{ width: depth * 20 }} />
 
-        {/* Expand/Collapse Icon */}
         {node.isLoading ? (
           <div className="p-1 flex items-center justify-center">
             <Loader2 size={16} className="animate-spin text-blue-500" />
@@ -237,7 +225,6 @@ export const NodeRenderer = ({
           <div style={{ width: 24 }} />
         )}
 
-        {/* Tri-State Checkbox (optional) */}
         {onCheck && (
           <div
             className="relative flex items-center justify-center"
@@ -263,7 +250,6 @@ export const NodeRenderer = ({
           </div>
         )}
 
-        {/* Node Content - Draggable ou Editável */}
         <div
           {...(isDraggable && !isEditing ? attributes : {})}
           {...(isDraggable && !isEditing ? listeners : {})}
@@ -291,9 +277,22 @@ export const NodeRenderer = ({
             />
           )}
         </div>
+
+        {/* Context Menu Trigger */}
+        {onContextMenu && !isEditing && (
+          <div
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onContextMenu(e);
+            }}
+          >
+            <MoreVertical size={14} className="text-gray-500" />
+          </div>
+        )}
+
       </motion.div>
 
-      {/* Drop indicator - AFTER */}
       {dropPosition === 'after' && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
       )}

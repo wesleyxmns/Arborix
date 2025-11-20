@@ -14,8 +14,9 @@ import React, { useEffect, useRef } from 'react';
 export interface ContextMenuItem {
   id: string;
   label: string;
+  shortcutLabel?: string;
   icon?: React.ReactNode;
-  action?: () => void; // ← opcional (para separadores)
+  action?: () => void;
   separator?: boolean;
   disabled?: boolean;
   danger?: boolean;
@@ -37,7 +38,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
     y: number;
   } | null>(null);
 
-  // Fechar ao clicar fora ou pressionar Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -62,7 +62,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
     };
   }, [onClose]);
 
-  // Ajustar posição para não sair da tela
   useEffect(() => {
     if (!menuRef.current) return;
 
@@ -82,7 +81,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
 
   const handleItemClick = (item: ContextMenuItem) => {
     if (item.separator || item.disabled || item.submenu) return;
-    item.action?.(); // ← chamada segura
+    item.action?.();
     onClose();
     setSubmenuState(null);
   };
@@ -117,6 +116,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
             >
               {item.icon && <span className="w-4 h-4 flex items-center justify-center">{item.icon}</span>}
               <span className="flex-1">{item.label}</span>
+              {item.shortcutLabel && (
+                <span className="text-xs text-gray-400 ml-3">{item.shortcutLabel}</span>
+              )}
               {item.submenu && <ChevronRight size={14} className="text-gray-400" />}
             </button>
           )}
@@ -140,7 +142,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
         </motion.div>
       </AnimatePresence>
 
-      {/* Submenu */}
       <AnimatePresence>
         {submenuState && (
           <>
@@ -167,7 +168,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
   );
 };
 
-// Hook para usar o menu de contexto
 export const useContextMenu = () => {
   const [contextMenu, setContextMenu] = React.useState<{
     x: number;
@@ -195,7 +195,6 @@ export const useContextMenu = () => {
   };
 };
 
-// Ícones prontos
 export const ContextMenuIcons = {
   Edit: <Edit2 size={16} />,
   Delete: <Trash2 size={16} />,
