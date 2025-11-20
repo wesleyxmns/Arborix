@@ -250,32 +250,47 @@ export const NodeRenderer = ({
           </div>
         )}
 
-        <div
-          {...(isDraggable && !isEditing ? attributes : {})}
-          {...(isDraggable && !isEditing ? listeners : {})}
-          className={`flex-1 ${isDraggable && !isEditing ? 'cursor-grab active:cursor-grabbing' : ''}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleSaveEdit}
-              className="w-full px-2 py-1 border border-green-400 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+        <div className="flex-1 flex items-center gap-1">
+          {isDraggable && !isEditing && (
+            <div
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={(e) => e.stopPropagation()}
-            />
-          ) : renderNode ? (
-            renderNode(node)
-          ) : (
-            <HighlightText
-              text={node.label}
-              indices={highlightIndices}
-              isCurrentResult={isCurrentResult}
-            />
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-gray-400">
+                <circle cx="3" cy="3" r="1" />
+                <circle cx="3" cy="6" r="1" />
+                <circle cx="3" cy="9" r="1" />
+                <circle cx="9" cy="3" r="1" />
+                <circle cx="9" cy="6" r="1" />
+                <circle cx="9" cy="9" r="1" />
+              </svg>
+            </div>
           )}
+
+          <div className="flex-1">
+            {isEditing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleSaveEdit}
+                className="w-full px-2 py-1 border border-green-400 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : renderNode ? (
+              renderNode(node)
+            ) : (
+              <HighlightText
+                text={node.label}
+                indices={highlightIndices}
+                isCurrentResult={isCurrentResult}
+              />
+            )}
+          </div>
         </div>
 
         {/* Context Menu Trigger */}

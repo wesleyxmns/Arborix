@@ -14,11 +14,33 @@
     }
   },
   "types": "./dist/types/index.d.ts",
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
+  "keywords": [
+    "react",
+    "tree",
+    "treeview",
+    "tree-view",
+    "virtual",
+    "virtualization",
+    "drag-drop",
+    "dnd",
+    "arborix",
+    "tree-component",
+    "react-tree"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wesleyxmns/Arborix.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wesleyxmns/Arborix/issues"
+  },
+  "homepage": "https://github.com/wesleyxmns/Arborix#readme",
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
