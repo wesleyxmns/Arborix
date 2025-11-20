@@ -10,7 +10,7 @@ export default defineConfig({
       insertTypesEntry: true,
       include: ['src/**/*'],
       outDir: 'dist/types',
-      rollupTypes: false, // ← MUDANÇA AQUI
+      rollupTypes: true,
       copyDtsFiles: true,
       staticImport: true,
       entryRoot: 'src',
