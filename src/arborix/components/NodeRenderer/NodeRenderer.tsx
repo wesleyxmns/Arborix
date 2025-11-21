@@ -155,7 +155,19 @@ export const NodeRenderer = ({
   return (
     <div className="relative group">
       {dropPosition === 'before' && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
+        <motion.div
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+          className="absolute -top-0.5 left-0 right-0 h-1 bg-blue-500 z-20 shadow-lg origin-left"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-md"
+          />
+        </motion.div>
       )}
 
       <motion.div
@@ -170,8 +182,8 @@ export const NodeRenderer = ({
         aria-posinset={ariaPosInSet}
         tabIndex={isFocused ? 0 : -1}
 
-        className={`group flex items-center gap-2 py-1 px-2 rounded transition-all outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
-          } ${isDragging || isBeingDragged ? 'shadow-lg' : ''} ${isCut || isDragging || isBeingDragged ? 'opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-300' : ''
+        className={`group flex items-center gap-2 py-1 px-2 rounded transition-all duration-200 ease-in-out outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
+          } ${isDragging || isBeingDragged ? 'shadow-lg' : ''} ${isCut || isDragging || isBeingDragged ? 'opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-400 ring-inset shadow-inner' : ''
           } ${isCurrentResult ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${isMatched && !isCurrentResult ? 'bg-yellow-50' : ''
           } ${isEditing ? 'ring-2 ring-green-400 bg-green-50' : 'cursor-pointer'}`}
 
@@ -202,6 +214,17 @@ export const NodeRenderer = ({
           onDragOver={(e) => handleDragOver(e, 'after')}
           onDragLeave={handleDragLeave}
         />
+
+        {/* Indicador de profundidade para drop inside */}
+        {dropPosition === 'inside' && (
+          <motion.div
+            initial={{ scaleY: 0, opacity: 0 }}
+            animate={{ scaleY: 1, opacity: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-md origin-top z-20"
+            style={{ left: `${(depth + 1) * 20}px` }}
+          />
+        )}
 
         <div style={{ width: depth * 20 }} />
 
@@ -309,7 +332,19 @@ export const NodeRenderer = ({
       </motion.div>
 
       {dropPosition === 'after' && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
+        <motion.div
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+          className="absolute -bottom-0.5 left-0 right-0 h-1 bg-blue-500 z-20 shadow-lg origin-left"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-md"
+          />
+        </motion.div>
       )}
     </div>
   );
