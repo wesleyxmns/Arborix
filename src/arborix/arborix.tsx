@@ -21,6 +21,7 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
     showExpandButtons = false,
     renderNode,
     onLoadData,
+    nodeClassName,
   } = props;
 
   const {
@@ -191,40 +192,15 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                         const y = e.clientY - rect.top;
                         const height = rect.height;
 
-                        // Verificar se o nó arrastado e o nó alvo são irmãos
-                        const draggedItem = flatData.find(item => item.node.id === activeId);
-                        const targetItem = flatData.find(item => item.node.id === node.id);
-                        const areSiblings = draggedItem?.parentId === targetItem?.parentId;
+                        // 3 Zones Logic (Ant Design style)
+                        const threshold = height * 0.33;
 
-                        const hasChildren = (node.children && node.children.length > 0) || (!!onLoadData && !node.isLeaf);
-                        const isNodeOpen = state.openIds.has(node.id);
-
-                        // Ajustar threshold baseado no contexto:
-                        // - Se são irmãos: priorizar before/after (35% cada, 30% inside)
-                        // - Se nó tem filhos abertos: facilitar before/after (35% cada, 30% inside)
-                        // - Se nó tem filhos fechados: balanceado (30% cada, 40% inside)
-                        // - Se é folha: apenas before/after (50% cada, sem inside)
-                        let threshold: number;
-                        if (!hasChildren) {
-                          threshold = 0.5; // Folha: 50/50 before/after, sem inside
-                        } else if (areSiblings || isNodeOpen) {
-                          threshold = 0.35; // Priorizar reordenação
-                        } else {
-                          threshold = 0.3; // Balanceado
-                        }
-
-                        if (y < height * threshold) {
+                        if (y < threshold) {
                           handleDragOver(node.id, 'before');
-                        } else if (y > height * (1 - threshold)) {
+                        } else if (y > height - threshold) {
                           handleDragOver(node.id, 'after');
                         } else {
-                          // Para nós folha, não permitir inside
-                          if (!hasChildren) {
-                            // Decidir entre before ou after baseado em qual está mais próximo
-                            handleDragOver(node.id, y < height * 0.5 ? 'before' : 'after');
-                          } else {
-                            handleDragOver(node.id, 'inside');
-                          }
+                          handleDragOver(node.id, 'inside');
                         }
                       }
                     }}
@@ -236,7 +212,7 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                       isSelected={isSelected}
                       checkState={checkState}
                       onToggle={() => handleToggle(node.id)}
-                      onSelect={(e) => {
+                      onSelect={(e: React.MouseEvent) => {
                         const multi = e.ctrlKey || e.metaKey;
                         const range = e.shiftKey;
                         const visibleNodes = flatData.map(i => i.node.id);
@@ -254,19 +230,19 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                       isEditing={isEditing}
                       isCut={state.cutNodeIds.has(node.id)}
                       onStartEdit={enableInlineEdit ? () => startEditing(node.id) : undefined}
-                      onSaveEdit={enableInlineEdit ? (newLabel) => saveEdit(node.id, newLabel) : undefined}
+                      onSaveEdit={enableInlineEdit ? (newLabel: string) => saveEdit(node.id, newLabel) : undefined}
                       onCancelEdit={enableInlineEdit ? cancelEditing : undefined}
-                      onContextMenu={enableContextMenu ? (e) => handleNodeContextMenu(e, node.id) : undefined}
+                      onContextMenu={enableContextMenu ? (e: React.MouseEvent) => handleNodeContextMenu(e, node.id) : undefined}
                       canLoadData={!!onLoadData}
                       isFocused={isFocused}
                       ariaSetSize={ariaSetSize}
                       ariaPosInSet={ariaPosInSet}
+                      className={nodeClassName}
                     />
                   </div>
                 );
               })}
             </div>
-            {/* Root Drop Zone */}
             {enableDragDrop && activeId && (
               <div
                 style={{

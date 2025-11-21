@@ -3,12 +3,68 @@ import type { DraggableAttributes, } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronRight, Loader2, Minus, MoreVertical } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ChevronRight, Loader2, Minus, MoreVertical } from 'lucide-react';
+import { useEffect, useRef, useState, memo } from 'react';
+import { cva } from 'class-variance-authority';
+import { cn } from '../../utils/cn';
 import { HighlightText } from '../HighlightText/HighlightText';
 
 type UseSortableReturnType = ReturnType<typeof useSortable>;
 type SyntheticListenerMap = UseSortableReturnType['listeners'];
+
+const nodeVariants = cva(
+  "group flex items-center gap-2 py-1 px-2 rounded transition-all duration-200 ease-in-out outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none cursor-pointer",
+  {
+    variants: {
+      isSelected: {
+        true: "bg-blue-100 hover:bg-blue-200",
+        false: "hover:bg-gray-100"
+      },
+      isDragging: {
+        true: "shadow-lg opacity-50",
+        false: ""
+      },
+      dropPosition: {
+        inside: "bg-blue-100 ring-2 ring-blue-500 ring-inset shadow-md",
+        before: "",
+        after: "",
+        null: ""
+      },
+      isCurrentResult: {
+        true: "ring-2 ring-blue-500 bg-blue-50",
+        false: ""
+      },
+      isMatched: {
+        true: "bg-yellow-50",
+        false: ""
+      },
+      isEditing: {
+        true: "ring-2 ring-green-400 bg-green-50 cursor-text",
+        false: ""
+      },
+      isCut: {
+        true: "opacity-50",
+        false: ""
+      }
+    },
+    compoundVariants: [
+      {
+        isMatched: true,
+        isCurrentResult: false,
+        className: "bg-yellow-50"
+      }
+    ],
+    defaultVariants: {
+      isSelected: false,
+      isDragging: false,
+      dropPosition: null,
+      isCurrentResult: false,
+      isMatched: false,
+      isEditing: false,
+      isCut: false
+    }
+  }
+);
 
 export interface NodeRendererProps {
   node: TreeNode;
@@ -39,9 +95,10 @@ export interface NodeRendererProps {
   ariaPosInSet?: number;
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
+  className?: string;
 }
 
-export const NodeRenderer = ({
+export const NodeRenderer = memo(({
   node,
   depth,
   isOpen,
@@ -68,6 +125,7 @@ export const NodeRenderer = ({
   isFocused = false,
   ariaSetSize,
   ariaPosInSet,
+  className,
 }: NodeRendererProps) => {
   const [editValue, setEditValue] = useState(node.label);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -159,13 +217,14 @@ export const NodeRenderer = ({
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="absolute -top-0.5 left-0 right-0 h-1 bg-blue-500 z-20 shadow-lg origin-left"
+          className="absolute -top-0.5 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm origin-left pointer-events-none"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-md"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 border-2 border-blue-500 bg-white rounded-full shadow-sm"
+            style={{ left: -4 }}
           />
         </motion.div>
       )}
@@ -181,14 +240,16 @@ export const NodeRenderer = ({
         aria-setsize={ariaSetSize}
         aria-posinset={ariaPosInSet}
         tabIndex={isFocused ? 0 : -1}
+        className={cn(nodeVariants({
+          isSelected,
+          isDragging: isDragging || isBeingDragged,
+          dropPosition: dropPosition === 'inside' ? 'inside' : null,
+          isCurrentResult,
+          isMatched,
+          isEditing,
+          isCut
+        }), className)}
 
-        className={`group flex items-center gap-2 py-1 px-2 rounded transition-all duration-200 ease-in-out outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none ${isSelected ? 'bg-blue-100 hover:bg-blue-200' : 'hover:bg-gray-100'
-          } ${isDragging || isBeingDragged ? 'shadow-lg' : ''} ${isCut || isDragging || isBeingDragged ? 'opacity-50' : ''} ${dropPosition === 'inside' ? 'bg-blue-50 ring-2 ring-blue-400 ring-inset shadow-inner' : ''
-          } ${isCurrentResult ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${isMatched && !isCurrentResult ? 'bg-yellow-50' : ''
-          } ${isEditing ? 'ring-2 ring-green-400 bg-green-50' : 'cursor-pointer'}`}
-
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
         onClick={isEditing ? undefined : (e) => {
           onSelect(e);
         }}
@@ -204,27 +265,18 @@ export const NodeRenderer = ({
         }}
       >
         <div
-          className="absolute top-0 left-0 right-0 h-1/4"
+          className="absolute top-0 left-0 right-0 h-1/4 z-10"
           onDragOver={(e) => handleDragOver(e, 'before')}
           onDragLeave={handleDragLeave}
         />
 
         <div
-          className="absolute bottom-0 left-0 right-0 h-1/4"
+          className="absolute bottom-0 left-0 right-0 h-1/4 z-10"
           onDragOver={(e) => handleDragOver(e, 'after')}
           onDragLeave={handleDragLeave}
         />
 
-        {/* Indicador de profundidade para drop inside */}
-        {dropPosition === 'inside' && (
-          <motion.div
-            initial={{ scaleY: 0, opacity: 0 }}
-            animate={{ scaleY: 1, opacity: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-md origin-top z-20"
-            style={{ left: `${(depth + 1) * 20}px` }}
-          />
-        )}
+        {/* Indicador de profundidade para drop inside removido pois o highlight já é suficiente */}
 
         <div style={{ width: depth * 20 }} />
 
@@ -242,7 +294,13 @@ export const NodeRenderer = ({
             aria-label={isOpen ? 'Collapse' : 'Expand'}
             disabled={isEditing}
           >
-            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            <motion.div
+              initial={false}
+              animate={{ rotate: isOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight size={16} />
+            </motion.div>
           </button>
         ) : (
           <div style={{ width: 24 }} />
@@ -331,21 +389,24 @@ export const NodeRenderer = ({
 
       </motion.div>
 
-      {dropPosition === 'after' && (
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="absolute -bottom-0.5 left-0 right-0 h-1 bg-blue-500 z-20 shadow-lg origin-left"
-        >
+      {
+        dropPosition === 'after' && (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-md"
-          />
-        </motion.div>
-      )}
-    </div>
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm origin-left pointer-events-none"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 border-2 border-blue-500 bg-white rounded-full shadow-sm"
+              style={{ left: -4 }}
+            />
+          </motion.div>
+        )
+      }
+    </div >
   );
-};
+});
