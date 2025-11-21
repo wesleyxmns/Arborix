@@ -114,53 +114,50 @@ PR_NUMBER=$(gh pr list --head $(git branch --show-current) --json number --jq '.
 echo "PR Number: $PR_NUMBER"
 ```
 
-8. **Criar nova versão (patch)**
+8. **Fazer merge do PR na main**
 ```bash
-npm version patch -m "chore: bump version to %s"
+gh pr merge $PR_NUMBER --squash --delete-branch
 ```
 
-9. **Obter a nova versão**
+9. **Voltar para a branch main e atualizar**
+```bash
+git checkout main
+git pull origin main
+```
+
+10. **Criar nova versão (patch)**
+```bash
+pnpm version patch
+```
+Nota: Isso atualiza o package.json, cria um commit e uma tag local automaticamente.
+
+11. **Obter a nova versão**
 ```bash
 NEW_VERSION=$(node -p "require('./package.json').version")
 echo "New version: $NEW_VERSION"
 ```
 
-10. **Criar release no GitHub**
+12. **Fazer push do commit e da tag**
 ```bash
-gh release create "v$NEW_VERSION" --title "v$NEW_VERSION - Melhorias no Drag and Drop" --notes "## 🎉 Novidades
-
-### Drag and Drop Aprimorado
-- Reordenação natural de itens no mesmo nível
-- Feedback visual rico com animações suaves
-- Indicadores claros para todas as posições de drop
-
-### Melhorias Técnicas
-- Sistema de estilos independente (não requer Tailwind CSS)
-- Detecção inteligente de contexto para drag and drop
-- Performance otimizada
-
-### Arquivos Modificados
-- \`arborix.tsx\` - Lógica de detecção de posição
-- \`NodeRenderer.tsx\` - Indicadores visuais
-- \`arborix.css\` - Novo arquivo de estilos
-- \`root.ts\` - Importação de CSS
-
-Veja o [Pull Request #$PR_NUMBER](https://github.com/wesleyxmns/Arborix/pull/$PR_NUMBER) para mais detalhes."
+git push origin main
+git push origin v$NEW_VERSION
 ```
 
-11. **Fazer merge do PR**
+13. **Criar ou atualizar release no GitHub**
 ```bash
-gh pr merge $PR_NUMBER --squash --delete-branch
-```
+gh release create "v$NEW_VERSION" --title "v$NEW_VERSION - [Título baseado nas mudanças]" --notes "## 🎯 Objetivo
 
-12. **Voltar para a branch main**
-```bash
-git checkout main
-```
+[Descrição detalhada das mudanças implementadas]
 
-13. **Puxar as mudanças da main**
-```bash
-git pull origin main
+## ✨ Mudanças Implementadas
+
+[Detalhes das mudanças]
+
+## 📁 Arquivos Modificados
+
+[Lista de arquivos modificados]
+
+Veja o [Pull Request #$PR_NUMBER](https://github.com/wesleyxmns/Arborix/pull/$PR_NUMBER) para mais detalhes." --latest
 ```
 
 14. **Mostrar status final**
