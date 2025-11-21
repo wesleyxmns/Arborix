@@ -9,13 +9,13 @@ import {
   Scissors,
   Trash2,
 } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import { FC, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 
 export interface ContextMenuItem {
   id: string;
   label: string;
   shortcutLabel?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   action?: () => void;
   separator?: boolean;
   disabled?: boolean;
@@ -30,9 +30,9 @@ export interface ContextMenuProps {
   onClose: () => void;
 }
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({ x, y, items, onClose }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [submenuState, setSubmenuState] = React.useState<{
+  const [submenuState, setSubmenuState] = useState<{
     itemId: string;
     x: number;
     y: number;
@@ -89,7 +89,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
   const renderItems = (menuItems: ContextMenuItem[]) => (
     <>
       {menuItems.map((item) => (
-        <React.Fragment key={item.id}>
+        <Fragment key={item.id}>
           {item.separator ? (
             <div className="h-px bg-gray-200 my-1" />
           ) : (
@@ -122,7 +122,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
               {item.submenu && <ChevronRight size={14} className="text-gray-400" />}
             </button>
           )}
-        </React.Fragment>
+        </Fragment>
       ))}
     </>
   );
@@ -169,7 +169,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
 };
 
 export const useContextMenu = () => {
-  const [contextMenu, setContextMenu] = React.useState<{
+  const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
     items: ContextMenuItem[];
@@ -181,7 +181,7 @@ export const useContextMenu = () => {
 
   const closeContextMenu = () => setContextMenu(null);
 
-  const handleContextMenu = (e: React.MouseEvent, items: ContextMenuItem[]) => {
+  const handleContextMenu = (e: MouseEvent, items: ContextMenuItem[]) => {
     e.preventDefault();
     e.stopPropagation();
     openContextMenu(e.clientX, e.clientY, items);

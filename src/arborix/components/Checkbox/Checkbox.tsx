@@ -1,4 +1,3 @@
-import React from 'react';
 import { Minus, Check } from 'lucide-react';
 
 type CheckboxState = 'checked' | 'unchecked' | 'indeterminate';

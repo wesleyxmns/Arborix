@@ -32,6 +32,7 @@ export interface ArborixProps {
     delete?: boolean;
   };
   customContextMenuItems?: (node: TreeNode) => ContextMenuItem[];
+  nodeClassName?: string;
 }
 
 export type TreeNodeId = string | number;

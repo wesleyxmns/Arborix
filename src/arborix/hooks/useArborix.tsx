@@ -253,7 +253,7 @@ export const useArborix = (props: ArborixProps) => {
       options: contextMenuOptions,
       customItems: customContextMenuItems,
     });
-    handleContextMenu(e, items);
+    handleContextMenu(e.nativeEvent, items);
   };
 
   return {
