@@ -1,12 +1,172 @@
 ---
-description: Automate GitHub flow: branch, commit, PR, release, merge
+description: Workflow completo de GitHub - criar branch, commit, PR, release e merge
 ---
 
-1. **Check Status**: Run `git status` to see what files are changed.
-2. **Create Branch**: Propose a branch name based on the changes (e.g., `feature/context-menu-updates`) and create it: `git checkout -b <branch_name>`.
-3. **Commit**: Stage all files (`git add .`) and commit with a descriptive message summarizing the changes (e.g., "feat: enhance context menu and fix selection logic").
-4. **Push**: Push the branch to origin: `git push -u origin <branch_name>`.
-5. **Create PR**: Create a Pull Request with a detailed description of what was done. Use `gh pr create --title "<Title>" --body "<Detailed Description>"`.
-6. **Create Release**: If requested or appropriate, create a release using `gh release create <tag> --generate-notes`.
-7. **Merge**: Merge the PR into main: `gh pr merge <branch_name> --merge --delete-branch`.
-8. **Cleanup**: Switch back to main and pull: `git checkout main && git pull`.
+# GitHub Workflow Completo
+
+Este workflow automatiza todo o processo de publicação de mudanças no GitHub.
+
+## Passos
+
+// turbo-all
+
+1. **Verificar status do git**
+```bash
+git status
+```
+
+2. **Criar nova branch com timestamp**
+```bash
+git checkout -b feature/improvements-$(date +%Y%m%d-%H%M%S)
+```
+
+3. **Adicionar todas as mudanças**
+```bash
+git add .
+```
+
+4. **Criar commit detalhado**
+```bash
+git commit -m "feat: Melhorias no sistema de Drag and Drop do Arborix
+
+- Corrigida lógica de reordenação no mesmo nível (siblings)
+- Implementado feedback visual aprimorado para drag and drop
+- Adicionados indicadores animados para posições before/after/inside
+- Criado arquivo arborix.css com classes Tailwind-like
+- Ajustado threshold dinâmico baseado em contexto do nó
+- Melhorado DragOverlay com visual premium
+- Otimizada detecção de posição de drop
+
+Componentes modificados:
+- src/arborix/arborix.tsx
+- src/arborix/components/NodeRenderer/NodeRenderer.tsx
+- src/arborix/arborix.css (novo)
+- src/arborix/root.ts
+- vite.config.ts"
+```
+
+5. **Push da branch para o repositório remoto**
+```bash
+git push -u origin HEAD
+```
+
+6. **Criar Pull Request usando GitHub CLI**
+```bash
+gh pr create --title "feat: Melhorias no Sistema de Drag and Drop" --body "## 🎯 Objetivo
+
+Aprimorar o sistema de drag and drop do componente Arborix, corrigindo a lógica de reordenação no mesmo nível e implementando feedback visual rico e animado.
+
+## ✨ Mudanças Implementadas
+
+### 1. Correção da Lógica de Reordenação
+- ✅ Corrigida detecção de posição de drop (before/after/inside)
+- ✅ Implementada reordenação no mesmo nível sem criar hierarquia indesejada
+- ✅ Ajuste dinâmico de thresholds baseado em contexto:
+  - Irmãos: 35% before, 35% after, 30% inside
+  - Nós com filhos abertos: 35% before, 35% after, 30% inside
+  - Nós com filhos fechados: 30% before, 30% after, 40% inside
+  - Nós folha: 50% before, 50% after, sem inside
+
+### 2. Feedback Visual Aprimorado
+- ✅ Linhas azuis animadas com círculos indicadores para before/after
+- ✅ Highlight diferenciado com ring e shadow-inner para inside
+- ✅ Barra vertical de profundidade para drop inside
+- ✅ Animações suaves (150ms) em todas as transições
+- ✅ DragOverlay premium com ícone de grip e sombra pronunciada
+
+### 3. Configuração de Estilos
+- ✅ Criado arquivo \`arborix.css\` com classes Tailwind-like
+- ✅ Componente não depende mais de Tailwind CSS instalado
+- ✅ Todos os estilos necessários incluídos no pacote
+
+## 📁 Arquivos Modificados
+
+- \`src/arborix/arborix.tsx\` - Lógica de detecção de posição e DragOverlay
+- \`src/arborix/components/NodeRenderer/NodeRenderer.tsx\` - Indicadores visuais
+- \`src/arborix/arborix.css\` - Novo arquivo com estilos
+- \`src/arborix/root.ts\` - Importação do CSS
+- \`vite.config.ts\` - Configuração para modo demo
+
+## 🧪 Testes Realizados
+
+- ✅ Reordenação de irmãos no mesmo nível
+- ✅ Movimentação entre diferentes níveis
+- ✅ Movimentação para a raiz
+- ✅ Feedback visual em todas as operações
+- ✅ Performance com árvores grandes
+
+## 📊 Comparação
+
+**Antes:**
+- ❌ Impossível reordenar irmãos sem criar hierarquia
+- ❌ Feedback visual mínimo
+- ❌ Threshold fixo
+
+**Depois:**
+- ✅ Reordenação natural de irmãos
+- ✅ Feedback visual rico com animações
+- ✅ Threshold inteligente baseado em contexto"
+```
+
+7. **Obter número do PR recém-criado**
+```bash
+PR_NUMBER=$(gh pr list --head $(git branch --show-current) --json number --jq '.[0].number')
+echo "PR Number: $PR_NUMBER"
+```
+
+8. **Criar nova versão (patch)**
+```bash
+npm version patch -m "chore: bump version to %s"
+```
+
+9. **Obter a nova versão**
+```bash
+NEW_VERSION=$(node -p "require('./package.json').version")
+echo "New version: $NEW_VERSION"
+```
+
+10. **Criar release no GitHub**
+```bash
+gh release create "v$NEW_VERSION" --title "v$NEW_VERSION - Melhorias no Drag and Drop" --notes "## 🎉 Novidades
+
+### Drag and Drop Aprimorado
+- Reordenação natural de itens no mesmo nível
+- Feedback visual rico com animações suaves
+- Indicadores claros para todas as posições de drop
+
+### Melhorias Técnicas
+- Sistema de estilos independente (não requer Tailwind CSS)
+- Detecção inteligente de contexto para drag and drop
+- Performance otimizada
+
+### Arquivos Modificados
+- \`arborix.tsx\` - Lógica de detecção de posição
+- \`NodeRenderer.tsx\` - Indicadores visuais
+- \`arborix.css\` - Novo arquivo de estilos
+- \`root.ts\` - Importação de CSS
+
+Veja o [Pull Request #$PR_NUMBER](https://github.com/wesleyxmns/Arborix/pull/$PR_NUMBER) para mais detalhes."
+```
+
+11. **Fazer merge do PR**
+```bash
+gh pr merge $PR_NUMBER --squash --delete-branch
+```
+
+12. **Voltar para a branch main**
+```bash
+git checkout main
+```
+
+13. **Puxar as mudanças da main**
+```bash
+git pull origin main
+```
+
+14. **Mostrar status final**
+```bash
+echo "✅ Processo concluído com sucesso!"
+echo "📦 Versão: v$NEW_VERSION"
+echo "🔗 Release: https://github.com/wesleyxmns/Arborix/releases/tag/v$NEW_VERSION"
+git log -1 --oneline
+```

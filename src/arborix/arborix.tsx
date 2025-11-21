@@ -191,17 +191,40 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
                         const y = e.clientY - rect.top;
                         const height = rect.height;
 
-                        // For leaf nodes (no children), prefer before/after (same-level reordering)
-                        // Use 50/50 split for easier sibling reordering
+                        // Verificar se o nó arrastado e o nó alvo são irmãos
+                        const draggedItem = flatData.find(item => item.node.id === activeId);
+                        const targetItem = flatData.find(item => item.node.id === node.id);
+                        const areSiblings = draggedItem?.parentId === targetItem?.parentId;
+
                         const hasChildren = (node.children && node.children.length > 0) || (!!onLoadData && !node.isLeaf);
-                        const threshold = hasChildren ? 0.25 : 0.5;
+                        const isNodeOpen = state.openIds.has(node.id);
+
+                        // Ajustar threshold baseado no contexto:
+                        // - Se são irmãos: priorizar before/after (35% cada, 30% inside)
+                        // - Se nó tem filhos abertos: facilitar before/after (35% cada, 30% inside)
+                        // - Se nó tem filhos fechados: balanceado (30% cada, 40% inside)
+                        // - Se é folha: apenas before/after (50% cada, sem inside)
+                        let threshold: number;
+                        if (!hasChildren) {
+                          threshold = 0.5; // Folha: 50/50 before/after, sem inside
+                        } else if (areSiblings || isNodeOpen) {
+                          threshold = 0.35; // Priorizar reordenação
+                        } else {
+                          threshold = 0.3; // Balanceado
+                        }
 
                         if (y < height * threshold) {
                           handleDragOver(node.id, 'before');
                         } else if (y > height * (1 - threshold)) {
                           handleDragOver(node.id, 'after');
                         } else {
-                          handleDragOver(node.id, 'inside');
+                          // Para nós folha, não permitir inside
+                          if (!hasChildren) {
+                            // Decidir entre before ou after baseado em qual está mais próximo
+                            handleDragOver(node.id, y < height * 0.5 ? 'before' : 'after');
+                          } else {
+                            handleDragOver(node.id, 'inside');
+                          }
                         }
                       }
                     }}
@@ -269,8 +292,19 @@ export const Arborix: React.FC<ArborixProps> = (props) => {
 
           <DragOverlay>
             {activeId ? (
-              <div className="bg-white shadow-lg rounded p-2 border-2 border-blue-400">
-                {flatData.find(item => item.node.id === activeId)?.node.label}
+              <div className="bg-white shadow-2xl rounded-lg p-3 border-2 border-blue-500 
+                              flex items-center gap-2 backdrop-blur-sm bg-opacity-95">
+                <svg width="16" height="16" viewBox="0 0 12 12" fill="currentColor" className="text-gray-400">
+                  <circle cx="3" cy="3" r="1" />
+                  <circle cx="3" cy="6" r="1" />
+                  <circle cx="3" cy="9" r="1" />
+                  <circle cx="9" cy="3" r="1" />
+                  <circle cx="9" cy="6" r="1" />
+                  <circle cx="9" cy="9" r="1" />
+                </svg>
+                <span className="font-medium text-gray-700">
+                  {flatData.find(item => item.node.id === activeId)?.node.label}
+                </span>
               </div>
             ) : null}
           </DragOverlay>
