@@ -1,8 +1,18 @@
 <div align="center">
-  <img src="./public/assets/ARBORIX_LOGO.png" alt="Arborix Logo" width="200" />
-  <h1 align="center">Arborix</h1>
+  <img src="./public/assets/ARBORIX_LOGO.png" alt="Arborix Logo" width="350" />
+  <br />
+  <br />
+
+  [![npm version](https://img.shields.io/npm/v/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
+  [![license](https://img.shields.io/npm/l/arborix?style=flat-square&color=2563eb)](https://github.com/wesleyxmns/arborix/blob/main/LICENSE)
+  [![downloads](https://img.shields.io/npm/dt/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
+  [![bundle size](https://img.shields.io/bundlephobia/minzip/arborix?style=flat-square&color=2563eb)](https://bundlephobia.com/package/arborix)
+
   <p align="center">
-    A High-Performance React Tree View Component with Virtualization, Drag & Drop, and Advanced Features
+    <b>The Ultimate React Tree View Component.</b>
+    <br />
+    High-performance, virtualized, and fully customizable with native Drag & Drop.
+    <br />
     <br />
     <a href="https://github.com/wesleyxmns/arborix/issues">Report Bug</a>
     ·
@@ -10,338 +20,173 @@
   </p>
 </div>
 
-## 📖 About
+<br />
 
-**Arborix** is a feature-rich, high-performance tree view component built with React and TypeScript. Designed for handling large datasets with millions of nodes, it uses **virtualization** to render only visible items, ensuring smooth performance. With built-in support for drag & drop, multi-selection, clipboard operations, search, keyboard navigation, and persistent state, Arborix is production-ready out of the box.
+## ⚡ Why Arborix?
+
+Handling large hierarchical datasets in React can be sluggish. **Arborix** solves this with **virtualization**, rendering only what's visible. Whether you have 100 or 1,000,000 nodes, Arborix stays buttery smooth.
+
+Built with modern tools like **@tanstack/react-virtual**, **@dnd-kit**, and **Framer Motion**, it provides a premium, native-like experience out of the box.
+
+---
 
 ## ✨ Features
 
-### Core Functionality
-- **🚀 High Performance with Virtualization** - Powered by `@tanstack/react-virtual`, renders only visible nodes for optimal performance with large datasets
-- **🖱️ Advanced Drag & Drop** - Intuitive reordering with `@dnd-kit`, visual drop indicators (before/after/inside), and smart zone detection
-- **🔍 Fuzzy Search** - Integrated search with result highlighting and keyboard navigation (Next/Previous)
-- **✍️ Inline Editing** - Double-click or F2/Enter to rename nodes directly in the tree
-- **✅ Tri-State Checkboxes** - Full support for checked/unchecked/indeterminate states with parent-child propagation
-- **💾 State Persistence** - Automatically saves expanded/selected/checked states to localStorage
+### 🚀 Core Performance
+- **Virtualization**: Efficiently renders huge datasets without UI lag.
+- **Lazy Loading**: Asynchronously load children nodes on demand.
+- **State Persistence**: Automatically saves expansion, selection, and check states to `localStorage`.
 
-### Selection & Navigation
-- **Multi-Selection** - Click, Ctrl+Click, Shift+Click for range selection, Ctrl+A to select all
-- **Keyboard Navigation** - Full arrow key support, Home/End, Enter, Space
-- **Focus Management** - Accessible focus indicators with proper ARIA attributes
-- **Click Outside to Deselect** - Automatically clears selection when clicking outside the tree
+### 🖱️ Interaction & Drag-and-Drop
+- **Advanced D&D**: Reorder nodes with precision. Visual indicators for "drop before", "drop after", and "drop inside".
+- **Multi-Selection**: Select multiple nodes using `Ctrl/Cmd` + Click or `Shift` + Click.
+- **Keyboard Navigation**: Full accessibility support (Arrows, Home, End, Enter, Space).
+- **Context Menu**: Built-in, customizable right-click menu for quick actions.
 
-### Clipboard Operations
-- **Cut/Copy/Paste** - Full clipboard support with Ctrl+X, Ctrl+C, Ctrl+V
-- **Multi-Item Operations** - Cut, copy, paste multiple nodes at once
-- **Visual Feedback** - Cut items display with reduced opacity, clipboard status indicator in toolbar
-- **Smart Paste** - Paste button automatically disabled when clipboard is empty
+### 🛠️ Powerful Utilities
+- **Inline Editing**: Rename nodes directly in the tree (Double-click or `F2`).
+- **Search**: Fuzzy search with highlighting and navigation.
+- **Clipboard**: Cut, copy, paste, and duplicate nodes (supports multi-selection).
+- **Tri-State Checkboxes**: Smart checkbox propagation (checked/unchecked/indeterminate).
 
-### Advanced Features
-- **Undo/Redo** - Complete history management with Ctrl+Z and Ctrl+Shift+Z
-- **Context Menu** - Right-click menu with customizable actions (rename, duplicate, cut, copy, paste, delete, add child/sibling)
-- **Expand/Collapse All** - Toolbar buttons to expand or collapse all nodes at once
-- **Lazy Loading** - Support for async data loading with `onLoadData` callback
-- **Custom Rendering** - Fully customizable node rendering via `renderNode` prop
-- **Plugin System** - Extensible architecture for adding custom functionality
-- **Accessibility** - Full ARIA support with proper roles, labels, and keyboard navigation
-
-### User Experience
-- **Smooth Animations** - Powered by Framer Motion for fluid transitions
-- **Visual Drop Zones** - Clear indicators showing where items will be dropped
-- **Drag Toggle** - Enable/disable drag & drop on the fly with toolbar button
-- **Search Highlighting** - Current search result highlighted differently from other matches
-- **Loading States** - Visual loading indicators for async operations
+---
 
 ## 📦 Installation
 
 ```bash
-# With npm
 npm install arborix
-
-# With yarn
-yarn add arborix
-
-# With pnpm
+# or
 pnpm add arborix
+# or
+yarn add arborix
 ```
 
+> **Note**: Arborix requires `react` and `react-dom` >= 18.
+
+---
+
 ## 🚀 Quick Start
+
+Here is a minimal example to get you started:
 
 ```tsx
 import React, { useState } from 'react';
 import { Arborix, TreeData } from 'arborix';
+import 'arborix/dist/index.css'; // Don't forget the styles!
 
 const initialData: TreeData = [
-  { 
-    id: "1", 
-    label: 'Documents', 
+  {
+    id: "1",
+    label: "Project Alpha",
     children: [
-      { id: "1.1", label: 'Reports' },
-      { id: "1.2", label: 'Contracts' },
+      { id: "1-1", label: "Documentation" },
+      { id: "1-2", label: "Source Code" },
     ]
   },
-  { 
-    id: "2", 
-    label: 'Images', 
-    children: [
-      { id: "2.1", label: 'logo.png' },
-      { id: "2.2", label: 'avatar.jpg' },
-    ]
-  },
+  {
+    id: "2",
+    label: "Project Beta",
+    children: []
+  }
 ];
 
-function App() {
+export default function App() {
   const [data, setData] = useState(initialData);
 
   return (
-    <div style={{ height: 600, width: 400 }}>
+    <div className="h-[600px] w-full border rounded-lg shadow-sm">
       <Arborix
         data={data}
         onDataChange={setData}
         height={600}
-        rowHeight={32}
-        showCheckboxes={true}
-        enableDragDrop={true}
-        enableSearch={true}
-        enableInlineEdit={true}
-        enableContextMenu={true}
-        showExpandButtons={true}
-        persistenceKey="my-tree"
+        enableDragDrop
+        enableSearch
+        showCheckboxes
       />
     </div>
   );
 }
-
-export default App;
 ```
 
-## ⚙️ Props
+---
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| **`data`** | `TreeData` | `[]` | **Required.** Array of tree nodes in nested format |
-| **`onDataChange`** | `(data: TreeData) => void` | `undefined` | **Required** for drag & drop, editing, and mutations to persist |
-| `height` | `number` | `600` | Height of the tree container (required for virtualization) |
-| `rowHeight` | `number` | `32` | Height of each row in pixels |
-| `showCheckboxes` | `boolean` | `false` | Enable tri-state checkboxes |
-| `enableDragDrop` | `boolean` | `true` | Enable drag and drop functionality |
-| `enableSearch` | `boolean` | `true` | Show search bar with fuzzy search |
-| `enableInlineEdit` | `boolean` | `true` | Allow renaming nodes via double-click or F2 |
-| `enableContextMenu` | `boolean` | `true` | Enable right-click context menu |
-| `showExpandButtons` | `boolean` | `false` | Show Expand All/Collapse All buttons in toolbar |
-| `persistenceKey` | `string` | `undefined` | Key for persisting state in localStorage |
-| `renderNode` | `(node: TreeNode) => ReactNode` | `undefined` | Custom node rendering function |
-| `onLoadData` | `(node: TreeNode) => Promise<TreeNode[]>` | `undefined` | Async callback for lazy loading children |
-| `contextMenuOptions` | `object` | `undefined` | Customize which context menu items to show |
-| `customContextMenuItems` | `(node: TreeNode) => ContextMenuItem[]` | `undefined` | Add custom context menu items |
-| `plugins` | `TreePlugin[]` | `[]` | Array of custom plugins |
+## 📖 API Reference
+
+### Main Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `data` | `TreeData` | `[]` | **Required**. The tree structure. |
+| `onDataChange` | `(data: TreeData) => void` | - | **Required**. Callback when data changes (drag, edit, delete). |
+| `height` | `number` | `600` | Height of the container (needed for virtualization). |
+| `rowHeight` | `number` | `32` | Height of each node row in pixels. |
+| `enableDragDrop` | `boolean` | `true` | Enables drag and drop reordering. |
+| `showCheckboxes` | `boolean` | `false` | Shows tri-state checkboxes. |
+| `enableSearch` | `boolean` | `true` | Shows the search bar. |
+| `enableInlineEdit` | `boolean` | `true` | Allows renaming via double-click. |
+| `enableContextMenu`| `boolean` | `true` | Enables the right-click context menu. |
+| `persistenceKey` | `string` | - | Unique key to persist state in `localStorage`. |
+
+### Customization
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `renderNode` | `(node: TreeNode) => ReactNode` | Custom render function for node content. |
+| `onLoadData` | `(node: TreeNode) => Promise<TreeNode[]>` | Callback for lazy loading children. |
+| `contextMenuOptions` | `object` | Toggle specific menu items (rename, delete, etc.). |
+| `customContextMenuItems` | `function` | Add your own actions to the context menu. |
+
+---
 
 ## ⌨️ Keyboard Shortcuts
 
-### Navigation
-- **Arrow Up/Down** - Move focus between nodes
-- **Arrow Right** - Expand focused node or move to first child
-- **Arrow Left** - Collapse focused node or move to parent
-- **Home** - Jump to first node
-- **End** - Jump to last node
-- **Enter** - Select focused node
-- **Space** - Toggle checkbox (if enabled) or select node
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Navigate focus between nodes |
+| `→` | Expand node / Move to child |
+| `←` | Collapse node / Move to parent |
+| `Enter` | Select node |
+| `Space` | Toggle checkbox / Select |
+| `F2` | Rename focused node |
+| `Ctrl` + `A` | Select all |
+| `Ctrl` + `C` / `X` / `V` | Copy / Cut / Paste |
+| `Delete` | Delete selected nodes |
+| `Ctrl` + `Z` / `Y` | Undo / Redo |
 
-### Selection
-- **Ctrl/Cmd + A** - Select all nodes
-- **Ctrl/Cmd + Click** - Multi-select individual nodes
-- **Shift + Click** - Range selection
+---
 
-### Editing
-- **F2** or **Enter** (on selected node) - Start inline editing
-- **Escape** - Cancel editing
-- **Enter** (while editing) - Save changes
+## 🏗️ Data Helpers
 
-### Clipboard
-- **Ctrl/Cmd + X** - Cut selected nodes
-- **Ctrl/Cmd + C** - Copy selected nodes
-- **Ctrl/Cmd + V** - Paste clipboard contents
-- **Ctrl/Cmd + D** - Duplicate selected nodes
-- **Delete** - Delete selected nodes
-
-### History
-- **Ctrl/Cmd + Z** - Undo
-- **Ctrl/Cmd + Shift + Z** or **Ctrl/Cmd + Y** - Redo
-
-### Search
-- **Ctrl/Cmd + F** - Focus search bar (when enabled)
-
-## 🎨 Advanced Usage
-
-### Custom Node Rendering
-
-```tsx
-<Arborix
-  data={data}
-  onDataChange={setData}
-  renderNode={(node) => (
-    <div className="flex items-center gap-2">
-      <span className="text-blue-500">{node.icon}</span>
-      <span className="font-medium">{node.label}</span>
-      {node.metadata?.badge && (
-        <span className="badge">{node.metadata.badge}</span>
-      )}
-    </div>
-  )}
-/>
-```
-
-### Lazy Loading
-
-```tsx
-<Arborix
-  data={data}
-  onDataChange={setData}
-  onLoadData={async (node) => {
-    const response = await fetch(`/api/nodes/${node.id}/children`);
-    const children = await response.json();
-    return children;
-  }}
-/>
-```
-
-### Custom Context Menu
-
-```tsx
-<Arborix
-  data={data}
-  onDataChange={setData}
-  contextMenuOptions={{
-    rename: true,
-    duplicate: true,
-    cut: true,
-    copy: true,
-    paste: true,
-    delete: true,
-    addChild: true,
-    addSibling: false, // Hide "Add Sibling"
-  }}
-  customContextMenuItems={(node) => [
-    {
-      label: 'Export',
-      onClick: () => exportNode(node),
-    },
-    {
-      label: 'Share',
-      onClick: () => shareNode(node),
-    },
-  ]}
-/>
-```
-
-### State Persistence
-
-```tsx
-// State is automatically saved to localStorage when persistenceKey is provided
-<Arborix
-  data={data}
-  onDataChange={setData}
-  persistenceKey="my-app-tree"
-  // Expanded nodes, selected nodes, and checked nodes are persisted
-/>
-```
-
-## 🏗️ Data Utilities
-
-### Converting Flat Data to Tree
-
-If your data is in flat format, use the `TreeDataBuilder`:
+Working with flat data from a database? Use our builder:
 
 ```typescript
 import { TreeDataBuilder } from 'arborix';
 
-const flatData = [
-  { id: '1', name: 'Root 1', parentId: null },
-  { id: '2', name: 'Child of 1', parentId: '1' },
-  { id: '3', name: 'Child of 2', parentId: '2' },
+const flat = [
+  { id: 1, title: 'Root', parent_id: null },
+  { id: 2, title: 'Child', parent_id: 1 }
 ];
 
-const treeData = TreeDataBuilder.fromFlat(flatData, {
-  label: 'name',        // Map 'name' field to 'label'
-  parentIdKey: 'parentId' // Specify parent reference field
+const tree = TreeDataBuilder.fromFlat(flat, {
+  label: 'title',
+  parentIdKey: 'parent_id'
 });
 ```
 
-## 🔌 Plugin System
-
-Extend Arborix with custom plugins:
-
-```typescript
-import { TreePlugin } from 'arborix';
-
-const myPlugin: TreePlugin = {
-  name: 'my-custom-plugin',
-  setup: (tree) => {
-    // Access tree instance
-    const state = tree.getState();
-    
-    // Listen to events
-    tree.emitter.on('node:select', (nodeId) => {
-      console.log('Node selected:', nodeId);
-    });
-    
-    // Cleanup function (optional)
-    return () => {
-      tree.emitter.off('node:select');
-    };
-  },
-};
-
-<Arborix
-  data={data}
-  onDataChange={setData}
-  plugins={[myPlugin]}
-/>
-```
-
-## 🎯 TypeScript Support
-
-Arborix is written in TypeScript and provides full type definitions:
-
-```typescript
-import { TreeNode, TreeData, ArborixProps, TreeNodeId } from 'arborix';
-
-interface CustomNode extends TreeNode {
-  metadata: {
-    icon: string;
-    color: string;
-    badge?: string;
-  };
-}
-
-const data: CustomNode[] = [
-  {
-    id: '1',
-    label: 'Custom Node',
-    metadata: {
-      icon: '📁',
-      color: 'blue',
-      badge: 'New',
-    },
-  },
-];
-```
-
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We love contributions!
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📜 License
+---
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🙏 Acknowledgments
-
-Built with:
-- [React](https://react.dev/)
-- [@tanstack/react-virtual](https://tanstack.com/virtual) - Virtualization
-- [@dnd-kit](https://dndkit.com/) - Drag and Drop
-- [Framer Motion](https://www.framer.com/motion/) - Animations
-- [Immer](https://immerjs.github.io/immer/) - Immutable State
-- [Lucide React](https://lucide.dev/) - Icons
+<div align="center">
+  <p>Distributed under the MIT License.</p>
+  <p>Built with ❤️ by <a href="https://github.com/wesleyxmns">Wesley Ximenes</a></p>
+</div>
