@@ -1,160 +1,66 @@
-import { DropPosition, TreeNode } from '@/arborix/types';
-import type { DraggableAttributes, } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { motion } from 'framer-motion';
-import { ChevronRight, Loader2, Minus, MoreVertical } from 'lucide-react';
-import { useEffect, useRef, useState, memo } from 'react';
-import { cva } from 'class-variance-authority';
+import { memo, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronRight, File, Folder, GripVertical, MoreVertical, Loader2 } from 'lucide-react';
+import { NodeRendererProps } from '../../types';
 import { cn } from '../../utils/cn';
 import { HighlightText } from '../HighlightText/HighlightText';
+import { useDragDrop } from '../../hooks/useDragDrop';
 
-type UseSortableReturnType = ReturnType<typeof useSortable>;
-type SyntheticListenerMap = UseSortableReturnType['listeners'];
-
-const nodeVariants = cva(
-  "group flex items-center gap-2 py-1 px-2 rounded transition-all duration-200 ease-in-out outline-none focus:ring-2 focus:ring-blue-400 focus:z-10 select-none cursor-pointer",
-  {
-    variants: {
-      isSelected: {
-        true: "bg-blue-100 hover:bg-blue-200",
-        false: "hover:bg-gray-100"
-      },
-      isDragging: {
-        true: "shadow-lg opacity-50",
-        false: ""
-      },
-      dropPosition: {
-        inside: "bg-blue-100 ring-2 ring-blue-500 ring-inset shadow-md",
-        before: "",
-        after: "",
-        null: ""
-      },
-      isCurrentResult: {
-        true: "ring-2 ring-blue-500 bg-blue-50",
-        false: ""
-      },
-      isMatched: {
-        true: "bg-yellow-50",
-        false: ""
-      },
-      isEditing: {
-        true: "ring-2 ring-green-400 bg-green-50 cursor-text",
-        false: ""
-      },
-      isCut: {
-        true: "opacity-50",
-        false: ""
-      }
-    },
-    compoundVariants: [
-      {
-        isMatched: true,
-        isCurrentResult: false,
-        className: "bg-yellow-50"
-      }
-    ],
-    defaultVariants: {
-      isSelected: false,
-      isDragging: false,
-      dropPosition: null,
-      isCurrentResult: false,
-      isMatched: false,
-      isEditing: false,
-      isCut: false
-    }
-  }
-);
-
-export interface NodeRendererProps {
-  node: TreeNode;
-  depth: number;
-  isOpen: boolean;
-  isSelected: boolean;
-  checkState?: 'checked' | 'unchecked' | 'indeterminate';
-  onToggle: () => void;
-  onSelect: (e: React.MouseEvent) => void;
-  onCheck?: () => void;
-  renderNode?: (node: TreeNode) => React.ReactNode;
-  isDraggable?: boolean;
-  isBeingDragged?: boolean;
-  dropPosition?: DropPosition | null;
-  onDropPositionChange?: (position: DropPosition | null) => void;
-  isMatched?: boolean;
-  isCurrentResult?: boolean;
-  highlightIndices?: number[];
-  isEditing?: boolean;
-  isCut?: boolean;
-  onStartEdit?: () => void;
-  onSaveEdit?: (newLabel: string) => void;
-  onCancelEdit?: () => void;
-  onContextMenu?: (e: React.MouseEvent) => void;
-  canLoadData?: boolean;
-  isFocused?: boolean;
-  ariaSetSize?: number;
-  ariaPosInSet?: number;
-  attributes?: DraggableAttributes;
-  listeners?: SyntheticListenerMap;
-  className?: string;
+interface ExtendedNodeRendererProps extends NodeRendererProps {
+  dragDrop: ReturnType<typeof useDragDrop>;
+  isDragEnabled?: boolean;
 }
 
 export const NodeRenderer = memo(({
   node,
   depth,
-  isOpen,
-  isSelected,
-  checkState = 'unchecked',
+  style,
   onToggle,
   onSelect,
+  isSelected,
+  isEditing,
+  isCurrentResult,
+  highlightIndices,
+  onContextMenu,
+  checkState,
   onCheck,
+  canLoadData,
+  isOpen,
+  ariaSetSize,
+  ariaPosInSet,
+  dragDrop,
+  isDragEnabled = true,
   renderNode,
-  isDraggable = true,
-  isBeingDragged = false,
-  canLoadData = false,
-  dropPosition = null,
-  onDropPositionChange,
-  isMatched = false,
-  isCurrentResult = false,
-  highlightIndices = [],
-  isEditing = false,
-  isCut = false,
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
-  onContextMenu,
-  isFocused = false,
-  ariaSetSize,
-  ariaPosInSet,
-  className,
-}: NodeRendererProps) => {
-  const [editValue, setEditValue] = useState(node.label);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const nodeRef = useRef<HTMLDivElement | null>(null);
-  const setCombinedRef = (el: HTMLDivElement | null) => {
-    setNodeRef(el);
-    nodeRef.current = el;
-  };
-
+  isCut
+}: ExtendedNodeRendererProps) => {
   const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: node.id,
-    disabled: !isDraggable || isEditing,
-  });
+    activeId,
+    overId,
+    dropPosition,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd
+  } = dragDrop;
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+  const [localEditValue, setLocalEditValue] = useState(node.label);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const checkboxRef = useRef<HTMLInputElement>(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  const hasChildren = (node.children && node.children.length > 0) || (canLoadData && !node.isLeaf);
+  const hasChildren = node.children && node.children.length > 0;
+  const isFolder = (node.children !== undefined) || (canLoadData && !node.isLeaf);
+
+  const isActive = activeId === node.id;
+  const isOver = overId === node.id;
+
+  const showBefore = isOver && dropPosition === 'before';
+  const showAfter = isOver && dropPosition === 'after';
+  const showInside = isOver && dropPosition === 'inside';
+
+  const indent = depth * 24;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -165,248 +71,213 @@ export const NodeRenderer = memo(({
 
   useEffect(() => {
     if (!isEditing) {
-      setEditValue(node.label);
+      setLocalEditValue(node.label);
     }
   }, [isEditing, node.label]);
 
-  const handleDragOver = (e: React.DragEvent, position: DropPosition) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onDropPositionChange?.(position);
-  };
+  useEffect(() => {
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = checkState === 'indeterminate';
+    }
+  }, [checkState]);
 
-  const handleDragLeave = () => {
-    onDropPositionChange?.(null);
-  };
-
-  const handleSaveEdit = () => {
-    if (editValue.trim() && onSaveEdit) {
-      onSaveEdit(editValue.trim());
+  const onLocalSaveEdit = () => {
+    if (onSaveEdit && localEditValue.trim()) {
+      onSaveEdit(localEditValue.trim());
     } else {
       onCancelEdit?.();
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const onLocalKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSaveEdit();
+      onLocalSaveEdit();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onCancelEdit?.();
     }
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    if (!isEditing && onStartEdit) {
-      e.stopPropagation();
-      onStartEdit();
-    }
+  // Handler local para dragOver que passa o node.id
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleDragOver(e, node.id);
   };
 
-  useEffect(() => {
-    if (isFocused && !isDragging && !isEditing && nodeRef.current) {
-      nodeRef.current.focus({ preventScroll: true });
+  // Handler local para dragStart que passa o node.id
+  const onDragStart = (e: React.DragEvent) => {
+    if (isEditing) {
+      e.preventDefault();
+      return;
     }
-  }, [isFocused, isDragging, isEditing]);
+    handleDragStart(e, node.id);
+  };
 
   return (
-    <div className="relative group">
-      {dropPosition === 'before' && (
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="absolute -top-0.5 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm origin-left pointer-events-none"
+    <div style={style} className="absolute w-full" ref={nodeRef}>
+      <div className="relative h-full group">
+        {/* BEFORE indicator - linha acima */}
+        <div
+          className={cn(
+            "absolute left-0 right-2 h-0.5 rounded-full pointer-events-none z-20",
+            "transition-opacity duration-75",
+            showBefore ? "bg-blue-500 opacity-100" : "opacity-0"
+          )}
+          style={{ marginLeft: `${indent}px`, top: 0 }}
+        />
+
+        <div
+          draggable={isDragEnabled && !isEditing}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(e);
+          }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            // Apenas ativa edit se NÃO estiver clicando em botão, ícone ou input
+            const target = e.target as HTMLElement;
+            if (
+              target.tagName !== 'BUTTON' &&
+              target.tagName !== 'svg' &&
+              target.tagName !== 'INPUT' &&
+              !target.closest('button')
+            ) {
+              if (!isEditing && onStartEdit) onStartEdit();
+              else if (isFolder) onToggle();
+            }
+          }}
+          onContextMenu={onContextMenu}
+          className={cn(
+            "relative flex items-center gap-1 h-full pr-2 rounded select-none",
+            "transition-all duration-75 outline-none",
+            // Cursor
+            isEditing ? "cursor-text" : "cursor-grab",
+            isActive && "cursor-grabbing",
+            // Estados visuais
+            isActive && "opacity-40 scale-[0.98]",
+            isSelected && !isActive && "bg-blue-50",
+            !isSelected && !isActive && "hover:bg-gray-50",
+            showInside && "bg-blue-100 ring-2 ring-blue-500 ring-inset",
+            isCut && "opacity-50"
+          )}
+          style={{ paddingLeft: `${indent}px` }}
+          role="treeitem"
+          aria-expanded={hasChildren ? isOpen : undefined}
+          aria-selected={isSelected}
+          aria-level={depth + 1}
+          aria-setsize={ariaSetSize}
+          aria-posinset={ariaPosInSet}
+          tabIndex={isEditing ? -1 : 0}
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 border-2 border-blue-500 bg-white rounded-full shadow-sm"
-            style={{ left: -4 }}
+          {/* Grip handle */}
+          <GripVertical
+            className={cn(
+              "w-4 h-4 flex-shrink-0 transition-colors",
+              isActive ? "text-blue-500" : "text-gray-300 hover:text-gray-500"
+            )}
           />
-        </motion.div>
-      )}
 
-      <motion.div
-        ref={setCombinedRef}
-        style={style}
-        layout
-        role="treeitem"
-        aria-expanded={hasChildren ? isOpen : undefined}
-        aria-selected={isSelected}
-        aria-level={depth + 1}
-        aria-setsize={ariaSetSize}
-        aria-posinset={ariaPosInSet}
-        tabIndex={isFocused ? 0 : -1}
-        className={cn(nodeVariants({
-          isSelected,
-          isDragging: isDragging || isBeingDragged,
-          dropPosition: dropPosition === 'inside' ? 'inside' : null,
-          isCurrentResult,
-          isMatched,
-          isEditing,
-          isCut
-        }), className)}
-
-        onClick={isEditing ? undefined : (e) => {
-          onSelect(e);
-        }}
-        onDoubleClick={handleDoubleClick}
-        onContextMenu={onContextMenu}
-        onDragOver={(e) => handleDragOver(e, 'inside')}
-        onDragLeave={handleDragLeave}
-
-        onKeyDown={(e) => {
-          if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-            e.preventDefault();
-          }
-        }}
-      >
-        <div
-          className="absolute top-0 left-0 right-0 h-1/4 z-10"
-          onDragOver={(e) => handleDragOver(e, 'before')}
-          onDragLeave={handleDragLeave}
-        />
-
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1/4 z-10"
-          onDragOver={(e) => handleDragOver(e, 'after')}
-          onDragLeave={handleDragLeave}
-        />
-
-        {/* Indicador de profundidade para drop inside removido pois o highlight já é suficiente */}
-
-        <div style={{ width: depth * 20 }} />
-
-        {node.isLoading ? (
-          <div className="p-1 flex items-center justify-center">
-            <Loader2 size={16} className="animate-spin text-blue-500" />
-          </div>
-        ) : hasChildren ? (
+          {/* Expand/collapse button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onToggle();
+              if (isFolder || canLoadData) onToggle();
             }}
-            className="p-1 hover:bg-gray-200 rounded transition-colors flex items-center justify-center"
-            aria-label={isOpen ? 'Collapse' : 'Expand'}
-            disabled={isEditing}
-          >
-            <motion.div
-              initial={false}
-              animate={{ rotate: isOpen ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronRight size={16} />
-            </motion.div>
-          </button>
-        ) : (
-          <div style={{ width: 24 }} />
-        )}
-
-        {onCheck && (
-          <div
-            className="relative flex items-center justify-center"
-            onClick={(e) => {
+            onDoubleClick={(e) => {
               e.stopPropagation();
-              if (!isEditing) onCheck();
             }}
-          >
-            {checkState === 'indeterminate' ? (
-              <div className="w-4 h-4 border-2 border-blue-500 rounded flex items-center justify-center bg-blue-500 cursor-pointer">
-                <Minus size={12} className="text-white" />
-              </div>
-            ) : (
-              <input
-                type="checkbox"
-                checked={checkState === 'checked'}
-                onChange={() => { }}
-                className="cursor-pointer w-4 h-4"
-                aria-label={`${checkState === 'checked' ? 'Uncheck' : 'Check'} ${node.label}`}
-                disabled={isEditing}
-              />
+            className={cn(
+              "w-5 h-5 flex items-center justify-center flex-shrink-0 rounded",
+              "hover:bg-gray-200 focus:outline-none",
+              (!isFolder && !canLoadData) && "invisible"
             )}
-          </div>
-        )}
+          >
+            {canLoadData && node.isLoading ? (
+              <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+            ) : (isFolder || canLoadData) && (
+              isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+            )}
+          </button>
 
-        <div className="flex-1 flex items-center gap-1">
-          {isDraggable && !isEditing && (
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          {/* Checkbox */}
+          {checkState !== undefined && (
+            <input
+              type="checkbox"
+              checked={checkState === 'checked'}
+              ref={checkboxRef}
+              onChange={(e) => { e.stopPropagation(); onCheck?.(e); }}
+              className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer mr-1"
+            />
+          )}
+
+          {/* Icon */}
+          {isFolder ? (
+            <Folder className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          ) : (
+            <File className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          )}
+
+          {/* Label / Edit input */}
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={localEditValue}
+              onChange={(e) => setLocalEditValue(e.target.value)}
+              onKeyDown={onLocalKeyDown}
+              onBlur={onLocalSaveEdit}
+              className="flex-1 ml-1 px-1 py-0.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+              autoFocus
               onClick={(e) => e.stopPropagation()}
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-gray-400">
-                <circle cx="3" cy="3" r="1" />
-                <circle cx="3" cy="6" r="1" />
-                <circle cx="3" cy="9" r="1" />
-                <circle cx="9" cy="3" r="1" />
-                <circle cx="9" cy="6" r="1" />
-                <circle cx="9" cy="9" r="1" />
-              </svg>
+            />
+          ) : renderNode ? (
+            <div className="flex-1 ml-1">{renderNode(node)}</div>
+          ) : (
+            <div className="flex-1 ml-1 truncate text-sm">
+              <HighlightText
+                text={node.label}
+                indices={highlightIndices || []}
+                isCurrentResult={isCurrentResult}
+              />
             </div>
           )}
 
-          <div className="flex-1">
-            {isEditing ? (
-              <input
-                ref={inputRef}
-                type="text"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onBlur={handleSaveEdit}
-                className="w-full px-2 py-1 border border-green-400 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : renderNode ? (
-              renderNode(node)
-            ) : (
-              <HighlightText
-                text={node.label}
-                indices={highlightIndices}
-                isCurrentResult={isCurrentResult}
-              />
-            )}
-          </div>
+          {/* Context menu button */}
+          {onContextMenu && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e);
+              }}
+              className={cn(
+                "ml-auto p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400",
+                "opacity-0 group-hover:opacity-100 transition-opacity"
+              )}
+              aria-label="More actions"
+            >
+              <MoreVertical className="h-4 w-4 text-gray-500" />
+            </button>
+          )}
         </div>
 
-        {/* Context Menu Trigger */}
-        {onContextMenu && !isEditing && (
-          <div
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              onContextMenu(e);
-            }}
-          >
-            <MoreVertical size={14} className="text-gray-500" />
-          </div>
-        )}
-
-      </motion.div>
-
-      {
-        dropPosition === 'after' && (
-          <motion.div
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ scaleX: 1, opacity: 1 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-blue-500 z-20 shadow-sm origin-left pointer-events-none"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.15, ease: 'easeOut', delay: 0.05 }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 border-2 border-blue-500 bg-white rounded-full shadow-sm"
-              style={{ left: -4 }}
-            />
-          </motion.div>
-        )
-      }
-    </div >
+        {/* AFTER indicator - linha abaixo */}
+        <div
+          className={cn(
+            "absolute left-0 right-2 h-0.5 rounded-full pointer-events-none z-20",
+            "transition-opacity duration-75",
+            showAfter ? "bg-blue-500 opacity-100" : "opacity-0"
+          )}
+          style={{ marginLeft: `${indent}px`, bottom: 0 }}
+        />
+      </div>
+    </div>
   );
 });
+
+NodeRenderer.displayName = 'NodeRenderer';

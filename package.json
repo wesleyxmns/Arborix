@@ -45,7 +45,10 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "demo:dev": "pnpm --filter arborix-demo dev",
+    "demo:build": "pnpm --filter arborix-demo build",
+    "dev:all": "concurrently \"pnpm dev\" \"pnpm demo:dev\" --names \"lib,demo\" --prefix-colors \"cyan,magenta\""
   },
   "peerDependencies": {
     "react": ">=18.2.0",
@@ -77,6 +80,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "terser": "^5.44.1",

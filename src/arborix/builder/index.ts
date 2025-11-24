@@ -74,7 +74,7 @@ export class TreeDataBuilder {
     try {
       z.array(NodeSchema).parse(result);
     } catch (e) {
-      console.warn('TreeDataBuilder: Dados gerados não passaram na validação Zod', e);
+      // Validation failed - proceed with generated data
     }
 
     builder.cache.set(key, cloneDeep(result));

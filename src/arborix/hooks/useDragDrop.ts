@@ -1,110 +1,79 @@
-import { useCallback, useState } from 'react';
-import type { DropPosition, TreeData, TreeNode, TreeNodeId } from '../types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { TreeData, TreeNode, TreeNodeId } from '../types';
+
+export type DropPosition = 'before' | 'after' | 'inside';
+
+
 
 const findNodeAndParent = (
-  nodes: TreeData,
-  id: TreeNodeId
-): { node: TreeNode; parentArray: TreeData; index: number } | null => {
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    if (node.id === id) {
-      return { node, parentArray: nodes, index: i };
-    }
+  data: TreeData,
+  targetId: TreeNodeId,
+  parent: TreeNode | null = null
+): { node: TreeNode; parent: TreeNode | null } | null => {
+  for (const node of data) {
+    if (node.id === targetId) return { node, parent };
     if (node.children) {
-      const found = findNodeAndParent(node.children, id);
-      if (found) return found;
+      const result = findNodeAndParent(node.children, targetId, node);
+      if (result) return result;
     }
   }
   return null;
 };
 
-const removeNode = (
-  data: TreeData,
-  nodeId: TreeNodeId
-): { newData: TreeData; removedNode: TreeNode | null } => {
-  let removedNode: TreeNode | null = null;
+const removeNode = (data: TreeData, nodeId: TreeNodeId): TreeData => {
+  const result: TreeData = [];
 
-  const remove = (nodes: TreeData): TreeData => {
-    return nodes.reduce<TreeData>((acc, node) => {
-      if (node.id === nodeId) {
-        removedNode = node;
-        return acc;
-      }
+  for (const node of data) {
+    if (node.id === nodeId) continue;
 
-      let newNode = { ...node };
-      if (node.children) {
-        const newChildren = remove(node.children);
+    if (node.children) {
+      const newChildren = removeNode(node.children, nodeId);
+      result.push({ ...node, children: newChildren });
+    } else {
+      result.push(node);
+    }
+  }
 
-        if (newChildren.length !== node.children.length || newChildren !== node.children) {
-          newNode.children = newChildren;
-        }
-
-        if (newNode.children?.length === 0) {
-          delete newNode.children;
-        }
-      }
-
-      acc.push(newNode);
-      return acc;
-    }, []);
-  };
-
-  const newData = remove(data);
-  return { newData, removedNode };
+  return result;
 };
 
 const insertNode = (
   data: TreeData,
-  targetId: TreeNodeId,
   nodeToInsert: TreeNode,
+  targetId: TreeNodeId,
   position: DropPosition
 ): TreeData => {
-  const deepClone = <T,>(obj: T): T => {
-    if (obj === null || typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(deepClone) as T;
+  const result: TreeData = [];
 
-    const cloned = { ...obj } as any;
-    for (const key in cloned) {
-      cloned[key] = deepClone(cloned[key]);
-    }
-    return cloned;
-  };
-
-  const newData = deepClone(data);
-
-  if (targetId === 'root') {
-    if (position === 'inside') { // Should typically be 'inside' or 'after' for root drop
-      newData.push(nodeToInsert);
-    }
-    return newData;
-  }
-
-  const targetInfo = findNodeAndParent(newData, targetId);
-
-  if (!targetInfo) return newData;
-
-  const { node: targetNode, parentArray, index } = targetInfo;
-
-  if (position === 'inside') {
-    targetNode.children = targetNode.children || [];
-    targetNode.children.unshift(nodeToInsert);
-
-    if (targetNode.isLeaf) targetNode.isLeaf = false;
-  } else {
-    if (position === 'before') {
-      parentArray.splice(index, 0, nodeToInsert);
-    } else if (position === 'after') {
-      parentArray.splice(index + 1, 0, nodeToInsert);
+  for (const current of data) {
+    if (current.id === targetId) {
+      if (position === 'before') {
+        result.push(nodeToInsert);
+        result.push(current);
+      } else if (position === 'after') {
+        result.push(current);
+        result.push(nodeToInsert);
+      } else {
+        result.push({
+          ...current,
+          children: [...(current.children || []), nodeToInsert],
+        });
+      }
+    } else if (current.children) {
+      const newChildren = insertNode(current.children, nodeToInsert, targetId, position);
+      result.push({ ...current, children: newChildren });
+    } else {
+      result.push(current);
     }
   }
 
-  return newData;
+  return result;
 };
 
 const isDescendantOf = (
+  data: TreeData,
   nodeId: TreeNodeId,
-  potentialAncestorId: TreeNodeId,
-  data: TreeData
+  ancestorId: TreeNodeId
 ): boolean => {
   const findNode = (nodes: TreeData, id: TreeNodeId): TreeNode | null => {
     for (const node of nodes) {
@@ -117,81 +86,249 @@ const isDescendantOf = (
     return null;
   };
 
-  const checkDescendants = (node: TreeNode): boolean => {
-    if (node.id === potentialAncestorId) return true;
-    if (node.children) {
-      return node.children.some(child => checkDescendants(child));
+  const hasDescendant = (node: TreeNode | null, targetId: TreeNodeId): boolean => {
+    if (!node?.children) return false;
+    for (const child of node.children) {
+      if (child.id === targetId) return true;
+      if (hasDescendant(child, targetId)) return true;
     }
     return false;
   };
 
-  const startNode = findNode(data, nodeId);
-  return startNode ? checkDescendants(startNode) : false;
+  const ancestor = findNode(data, ancestorId);
+  return hasDescendant(ancestor, nodeId);
 };
 
-export interface UseDragDropResult {
-  activeId: TreeNodeId | null;
-  overId: TreeNodeId | null;
-  dropPosition: DropPosition | null;
-  handleDragStart: (id: TreeNodeId) => void;
-  handleDragOver: (id: TreeNodeId, position: DropPosition) => void;
-  handleDragEnd: (data: TreeData, onUpdate: (newData: TreeData) => void) => void;
-  handleDragCancel: () => void;
-  canDrop: (draggedId: TreeNodeId, targetId: TreeNodeId, data: TreeData) => boolean;
-}
+const cleanupEmptyParents = (data: TreeData): TreeData => {
+  return data.map(node => {
+    if (node.children) {
+      const cleanedChildren = cleanupEmptyParents(node.children);
+      if (cleanedChildren.length === 0) {
+        const { children, ...rest } = node;
+        return rest as TreeNode;
+      }
+      return { ...node, children: cleanedChildren };
+    }
+    return node;
+  });
+};
 
-export const useDragDrop = (): UseDragDropResult => {
+
+
+export const useDragDrop = (
+  data: TreeData,
+  onUpdate: (newData: TreeData) => void
+) => {
   const [activeId, setActiveId] = useState<TreeNodeId | null>(null);
   const [overId, setOverId] = useState<TreeNodeId | null>(null);
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
 
-  const handleDragCancel = useCallback(() => {
+  const dataRef = useRef(data);
+  const onUpdateRef = useRef(onUpdate);
+
+  const activeIdRef = useRef<TreeNodeId | null>(null);
+  const overIdRef = useRef<TreeNodeId | null>(null);
+  const dropPositionRef = useRef<DropPosition | null>(null);
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
+  useEffect(() => {
+    overIdRef.current = overId;
+  }, [overId]);
+
+  useEffect(() => {
+    dropPositionRef.current = dropPosition;
+  }, [dropPosition]);
+
+  const handleDragStart = useCallback((e: React.DragEvent, id: TreeNodeId) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(id));
+    setActiveId(id);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, id: TreeNodeId) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Usa refs para pegar valores atualizados
+    const currentData = dataRef.current;
+    const currentActiveId = activeIdRef.current;
+
+    // Validações
+    if (!currentActiveId) {
+      return;
+    }
+
+    if (currentActiveId === id) {
+      e.dataTransfer.dropEffect = 'none';
+      setOverId(null);
+      setDropPosition(null);
+      return;
+    }
+
+    if (isDescendantOf(currentData, id, currentActiveId)) {
+      e.dataTransfer.dropEffect = 'none';
+      setOverId(null);
+      setDropPosition(null);
+      return;
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+
+    // Obtém informações dos nodes
+    const draggedInfo = findNodeAndParent(currentData, currentActiveId);
+    const targetInfo = findNodeAndParent(currentData, id);
+
+    if (!draggedInfo || !targetInfo) {
+      return;
+    }
+
+    const isSiblingReorder = draggedInfo.parent?.id === targetInfo.parent?.id;
+    const targetIsLeaf = !targetInfo.node.children || targetInfo.node.children.length === 0;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseY = e.clientY;
+    const rectTop = rect.top;
+    const rectHeight = rect.height;
+    const middle = rectTop + (rectHeight / 2);
+
+    let pos: DropPosition;
+
+    if (isSiblingReorder && !targetIsLeaf) {
+      pos = mouseY < middle ? 'before' : 'after';
+    } else {
+      const y = mouseY - rectTop;
+      if (y < rectHeight * 0.25) {
+        pos = 'before';
+      } else if (y > rectHeight * 0.75) {
+        pos = 'after';
+      } else {
+        pos = 'inside';
+      }
+    }
+
+    const currentOverId = overIdRef.current;
+    const currentDropPosition = dropPositionRef.current;
+
+    if (currentOverId === id && currentDropPosition === pos) {
+      return;
+    }
+
+    if (currentOverId !== id) {
+      setOverId(id);
+    }
+    if (currentDropPosition !== pos) {
+      setDropPosition(pos);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const currentActiveId = activeIdRef.current;
+    const currentOverId = overIdRef.current;
+    const currentDropPosition = dropPositionRef.current;
+    const currentData = dataRef.current;
+
+    setActiveId(null);
+    setOverId(null);
+    setDropPosition(null);
+
+    // Validações
+    if (!currentActiveId || !currentOverId || !currentDropPosition) {
+      return;
+    }
+
+    if (currentActiveId === currentOverId) {
+      return;
+    }
+
+    if (currentOverId === '__root__') {
+      // Handled by handleRootDrop
+      return;
+    }
+
+    if (isDescendantOf(currentData, currentOverId, currentActiveId)) {
+      return;
+    }
+
+    // Encontra o nó sendo arrastado
+    const draggedInfo = findNodeAndParent(currentData, currentActiveId);
+    if (!draggedInfo) {
+      return;
+    }
+
+    // 1. Remove da posição atual
+    let dataAfterRemove = removeNode(currentData, currentActiveId);
+
+    // 2. Limpa parents vazios (converte para leaf)
+    dataAfterRemove = cleanupEmptyParents(dataAfterRemove);
+
+    // 3. Insere na nova posição
+    const dataAfterInsert = insertNode(
+      dataAfterRemove,
+      draggedInfo.node,
+      currentOverId,
+      currentDropPosition
+    );
+
+    // 4. Atualiza e faz commit para histórico
+    onUpdateRef.current(dataAfterInsert);
+  }, []); // CRÍTICO: Array vazio - handler nunca é recriado!
+
+  const handleDragEnd = useCallback(() => {
     setActiveId(null);
     setOverId(null);
     setDropPosition(null);
   }, []);
 
-  const handleDragStart = useCallback((id: TreeNodeId) => {
-    setActiveId(id);
-  }, []);
+  const handleRootDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const handleDragOver = useCallback((id: TreeNodeId, position: DropPosition) => {
-    setOverId(id);
-    setDropPosition(position);
-  }, []);
-
-  const canDrop = useCallback((draggedId: TreeNodeId, targetId: TreeNodeId, data: TreeData): boolean => {
-    if (draggedId === targetId) return false;
-    if (targetId === 'root') return true;
-
-    if (isDescendantOf(targetId, draggedId, data)) return false;
-
-    return true;
-  }, []);
-
-  const handleDragEnd = useCallback((data: TreeData, onUpdate: (newData: TreeData) => void) => {
-    if (!activeId || !overId || !dropPosition) {
-      handleDragCancel();
-      return;
+    const currentActiveId = activeIdRef.current;
+    if (currentActiveId) {
+      e.dataTransfer.dropEffect = 'move';
+      setOverId('__root__');
+      setDropPosition('inside');
     }
+  }, []); // CRÍTICO: Array vazio - handler nunca é recriado!
 
-    if (!canDrop(activeId, overId, data)) {
-      handleDragCancel();
-      return;
-    }
+  const handleRootDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    const { newData: intermediateData, removedNode } = removeNode(data, activeId);
+    const currentActiveId = activeIdRef.current;
+    const currentData = dataRef.current;
 
-    if (!removedNode) {
-      handleDragCancel();
-      return;
-    }
+    // Reset state
+    setActiveId(null);
+    setOverId(null);
+    setDropPosition(null);
 
-    const finalData = insertNode(intermediateData, overId, removedNode, dropPosition);
+    if (!currentActiveId) return;
 
-    onUpdate(finalData);
-    handleDragCancel();
-  }, [activeId, overId, dropPosition, canDrop, handleDragCancel]);
+    const draggedInfo = findNodeAndParent(currentData, currentActiveId);
+    if (!draggedInfo) return;
+
+    let dataAfterRemove = removeNode(currentData, currentActiveId);
+    // Limpa parents vazios após remover
+    dataAfterRemove = cleanupEmptyParents(dataAfterRemove);
+    const newData = [...dataAfterRemove, draggedInfo.node];
+
+    onUpdateRef.current(newData);
+  }, []); // CRÍTICO: Array vazio - handler nunca é recriado!
 
   return {
     activeId,
@@ -199,8 +336,9 @@ export const useDragDrop = (): UseDragDropResult => {
     dropPosition,
     handleDragStart,
     handleDragOver,
+    handleDrop,
     handleDragEnd,
-    handleDragCancel,
-    canDrop,
+    handleRootDragOver,
+    handleRootDrop,
   };
 };

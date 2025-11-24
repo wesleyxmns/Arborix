@@ -1,13 +1,5 @@
-import {
-  closestCenter,
-  MeasuringStrategy,
-  PointerSensor,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import { verticalListSortingStrategy } from '@dnd-kit/sortable';
 import EventEmitter from 'eventemitter3';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useContextMenu } from '../components/ContextMenu/ContextMenu';
 import { PluginManager } from '../plugins/plugins';
@@ -15,7 +7,6 @@ import type { ArborixProps, TreeInstance, TreeNodeId } from '../types';
 import { getContextMenuItems } from '../utils/menuUtils';
 import { filterTreeData } from '../utils/treeUtils';
 import { useVirtualTree } from '../virtual/useVirtualTree';
-import { useDragDrop } from './useDragDrop';
 import { useTreeClipboard } from './useTreeClipboard';
 import { useTreeKeyboard } from './useTreeKeyboard';
 import { useTreeSearch } from './useTreeSearch';
@@ -27,7 +18,7 @@ export const useArborix = (props: ArborixProps) => {
     persistenceKey,
     rowHeight = 32,
     showCheckboxes = false,
-    enableDragDrop = true,
+    // enableDragDrop = true, // Removed unused prop
     enableInlineEdit = true,
     enableContextMenu = true,
     filterFn,
@@ -39,14 +30,17 @@ export const useArborix = (props: ArborixProps) => {
   } = props;
 
   const emitter = useMemo(() => new EventEmitter(), []);
-  const [isDragEnabled, setIsDragEnabled] = useState(enableDragDrop);
 
-  // Sync internal state if prop changes, but allow toggle
-  useEffect(() => {
-    setIsDragEnabled(enableDragDrop);
-  }, [enableDragDrop]);
+  // Drag enabled state logic removed as it's handled by Arborix component directly now
+  // or we can keep it if we want to toggle it via toolbar, but the hook logic is gone.
+  // Let's keep the state for toolbar toggle compatibility if needed, but it's not used by the new hook directly.
+  // const [isDragEnabled, setIsDragEnabled] = useState(enableDragDrop);
 
-  const toggleDrag = () => setIsDragEnabled(prev => !prev);
+  // useEffect(() => {
+  //   setIsDragEnabled(enableDragDrop);
+  // }, [enableDragDrop]);
+
+  // const toggleDrag = () => setIsDragEnabled(prev => !prev);
 
   const stateHook = useTreeState(data, { persistenceKey, emitter });
   const {
@@ -54,9 +48,9 @@ export const useArborix = (props: ArborixProps) => {
     toggleOpen,
     selectNode,
     selectAllNodes,
-    clearSelection,
+    // clearSelection, // Used in return
     toggleCheck,
-    setData,
+    // setData, // Used in return? No, internal state update.
     commit,
     undo,
     redo,
@@ -79,9 +73,6 @@ export const useArborix = (props: ArborixProps) => {
     getState,
     updateState
   } = stateHook;
-
-  const dragDropHook = useDragDrop();
-  const { handleDragEnd } = dragDropHook;
 
   const contextMenuHook = useContextMenu();
   const { handleContextMenu } = contextMenuHook;
@@ -143,7 +134,6 @@ export const useArborix = (props: ArborixProps) => {
           toggleOpen(id);
         }
       } catch (error) {
-        console.error("Erro ao carregar nós:", error);
         setNodeLoading(id, false);
       }
     } else {
@@ -216,19 +206,6 @@ export const useArborix = (props: ArborixProps) => {
     }
   }, [currentResult]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    })
-  );
-
-  const handleDrop = () => {
-    handleDragEnd(state.data, (newData) => {
-      setData(newData);
-      commit();
-    });
-  };
-
   const handleNodeContextMenu = (e: React.MouseEvent, nodeId: TreeNodeId) => {
     if (!enableContextMenu) return;
 
@@ -263,30 +240,15 @@ export const useArborix = (props: ArborixProps) => {
     virtualRows,
     totalHeight,
     nodeIds: flatData.map(item => item.node.id),
-    isDragEnabled,
-    toggleDrag,
 
     stateHook,
-    dragDropHook,
     contextMenuHook,
     clipboardHook,
     searchHook,
-    virtualHook,
     keyboardHook,
 
     handleToggle,
-    handleDrop,
     handleNodeContextMenu,
     getHighlightIndices,
-    clearSelection,
-
-    sensors,
-    dndConfig: {
-      collisionDetection: closestCenter,
-      measuring: { droppable: { strategy: MeasuringStrategy.Always } },
-    },
-    sortableConfig: {
-      strategy: verticalListSortingStrategy,
-    },
   };
 };
