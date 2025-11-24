@@ -327,14 +327,6 @@ const data: CustomNode[] = [
 ];
 ```
 
-## 🧪 Demo Playground
-
-Testar as funcionalidades localmente agora é bem simples:
-
-1. `pnpm install`
-2. `pnpm demo:dev`
-
-Isso inicia um app Vite em `apps/demo` que consome o pacote via workspace. O playground mostra controles para habilitar/desabilitar recursos (checkboxes, drag, inline edit, busca), registra as últimas ações e renderiza a árvore real do pacote, facilitando validar reordenação de irmãos, drag entre níveis e demais melhorias visualizadas em tempo real.
 
 ## 🤝 Contributing
 
