@@ -6,7 +6,6 @@
   [![npm version](https://img.shields.io/npm/v/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
   [![license](https://img.shields.io/npm/l/arborix?style=flat-square&color=2563eb)](https://github.com/wesleyxmns/arborix/blob/main/LICENSE)
   [![downloads](https://img.shields.io/npm/dt/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
-  [![bundle size](https://img.shields.io/bundlephobia/minzip/arborix?style=flat-square&color=2563eb)](https://bundlephobia.com/package/arborix)
 
   <p align="center">
     <b>The Ultimate React Tree View Component.</b>
@@ -37,17 +36,33 @@ Built with modern tools like **@tanstack/react-virtual**, **@dnd-kit**, and **Fr
 - **Lazy Loading**: Asynchronously load children nodes on demand.
 - **State Persistence**: Automatically saves expansion, selection, and check states to `localStorage`.
 
-### 🖱️ Interaction & Drag-and-Drop
-- **Advanced D&D**: Reorder nodes with precision. Visual indicators for "drop before", "drop after", and "drop inside".
-- **Multi-Selection**: Select multiple nodes using `Ctrl/Cmd` + Click or `Shift` + Click.
-- **Keyboard Navigation**: Full accessibility support (Arrows, Home, End, Enter, Space).
-- **Context Menu**: Built-in, customizable right-click menu for quick actions.
+### 🖱️ Advanced Interaction
+- **Drag & Drop**: 
+  - **Precise Reordering**: Drop items **before**, **after**, or **inside** other nodes.
+  - **Visual Feedback**: Clear indicators show exactly where the item will land.
+  - **Auto-Scroll**: Drags automatically scroll the container when reaching edges.
+- **Multi-Selection**: 
+  - `Click` to select.
+  - `Ctrl/Cmd + Click` to toggle multiple nodes.
+  - `Shift + Click` to select a range of nodes.
+  - `Ctrl + A` to select all visible nodes.
+- **Context Menu**: 
+  - Built-in right-click menu with actions like **Rename**, **Duplicate**, **Cut/Copy/Paste**, **Delete**, and **Add Child/Sibling**.
+  - Fully customizable via props.
 
 ### 🛠️ Powerful Utilities
 - **Inline Editing**: Rename nodes directly in the tree (Double-click or `F2`).
-- **Search**: Fuzzy search with highlighting and navigation.
-- **Clipboard**: Cut, copy, paste, and duplicate nodes (supports multi-selection).
-- **Tri-State Checkboxes**: Smart checkbox propagation (checked/unchecked/indeterminate).
+- **Search**: 
+  - **Fuzzy Search**: Finds nodes even with partial matches.
+  - **Highlighting**: Matches are highlighted in the tree.
+  - **Navigation**: Jump between search results with `Enter`.
+- **Clipboard Operations**: 
+  - **Cross-Tree Support**: Copy from one tree and paste into another (if data structure matches).
+  - **Batch Operations**: Cut/Copy/Paste multiple nodes at once.
+  - **Visual Cues**: Cut items appear dimmed until pasted.
+- **Tri-State Checkboxes**: 
+  - **Propagation**: Checking a parent checks all children.
+  - **Indeterminate State**: Parents show a dash if only some children are checked.
 
 ---
 
