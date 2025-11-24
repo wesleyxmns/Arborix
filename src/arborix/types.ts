@@ -130,3 +130,35 @@ export const NodeSchema: z.ZodType<TreeNode> = z.object({
   metadata: z.record(z.any()).optional(),
 }).passthrough();
 
+export interface NodeRendererProps {
+  node: TreeNode;
+  depth: number;
+  style?: React.CSSProperties;
+  onToggle: () => void;
+  onSelect: (e: React.MouseEvent) => void;
+  isSelected: boolean;
+  isEditing?: boolean;
+  editValue?: string;
+  setEditValue?: (value: string) => void;
+  handleKeyDown?: (e: React.KeyboardEvent) => void;
+  handleSaveEdit?: () => void;
+  isMatched?: boolean;
+  isCurrentResult?: boolean;
+  highlightIndices?: number[];
+  onContextMenu?: (e: React.MouseEvent) => void;
+  checkState?: 'checked' | 'unchecked' | 'indeterminate';
+  onCheck?: (e: React.ChangeEvent) => void;
+  canLoadData?: boolean;
+  isOpen?: boolean;
+  ariaSetSize?: number;
+  ariaPosInSet?: number;
+  className?: string;
+  onStartEdit?: () => void;
+  onSaveEdit?: (value: string) => void;
+  onCancelEdit?: () => void;
+  isFocused?: boolean;
+  isCut?: boolean;
+  dragDrop?: any;
+  renderNode?: (node: any) => React.ReactNode;
+}
+

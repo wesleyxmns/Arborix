@@ -24,9 +24,6 @@ export interface TreeToolbarProps {
   showExpandButtons?: boolean;
   onExpandAll?: () => void;
   onCollapseAll?: () => void;
-
-  // Paste
-  onPaste?: () => void;
 }
 
 export const TreeToolbar: React.FC<TreeToolbarProps> = ({
@@ -45,7 +42,6 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
   showExpandButtons = false,
   onExpandAll,
   onCollapseAll,
-  onPaste,
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -93,17 +89,6 @@ export const TreeToolbar: React.FC<TreeToolbarProps> = ({
             ⊖ Collapse All
           </button>
         </div>
-      )}
-
-      {onPaste && (
-        <button
-          onClick={onPaste}
-          disabled={!clipboard}
-          className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Paste (Cmd/Ctrl + V)"
-        >
-          📋 Paste
-        </button>
       )}
 
       {enableDragDrop && (

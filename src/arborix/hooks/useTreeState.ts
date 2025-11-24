@@ -44,7 +44,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
           };
         }
       } catch (e) {
-        console.warn('Arborix: Falha ao carregar estado persistido', e);
+        // Silent fail - use initial data if persistence fails
       }
     }
 
@@ -77,7 +77,7 @@ export const useTreeState = (initialData: TreeData, options: UseTreeStateOptions
     try {
       localStorage.setItem(`arborix-${persistenceKey}`, JSON.stringify(stateToSave));
     } catch (e) {
-      console.warn('Arborix: Falha ao salvar estado', e);
+      // Silent fail - localStorage may be unavailable
     }
   }, [state.data, state.openIds, state.selectedIds, state.checkedIds, persistenceKey]);
 
