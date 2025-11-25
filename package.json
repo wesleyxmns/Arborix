@@ -1,7 +1,7 @@
 {
   "name": "arborix",
-  "version": "1.0.18",
-  "description": "Componente React para Tree View de Alto Desempenho com Virtualização e D&D.",
+  "version": "2.0.0",
+  "description": "Headless React tree component - Unstyled, accessible, fully customizable tree view primitives with virtualization and drag & drop.",
   "author": "Wesley Ximenes",
   "license": "MIT",
   "main": "./dist/index.cjs.js",
@@ -19,6 +19,7 @@
   "files": [
     "dist",
     "README.md",
+    "MIGRATION.md",
     "LICENSE"
   ],
   "keywords": [
@@ -26,13 +27,18 @@
     "tree",
     "treeview",
     "tree-view",
+    "headless",
+    "headless-ui",
+    "unstyled",
+    "accessible",
     "virtual",
     "virtualization",
     "drag-drop",
     "dnd",
     "arborix",
     "tree-component",
-    "react-tree"
+    "react-tree",
+    "compound-components"
   ],
   "repository": {
     "type": "git",
@@ -59,7 +65,6 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-virtual": "^3.10.8",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eventemitter3": "^5.0.1",
     "framer-motion": "^11.11.0",

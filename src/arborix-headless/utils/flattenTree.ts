@@ -1,0 +1,44 @@
+import type { TreeNode, TreeNodeId } from '../types';
+
+// ============================================================================
+// Flatten Visible Tree Utility
+// Copied from v1.x - EXACT SAME LOGIC
+// ============================================================================
+
+export interface VisibleNode {
+  node: TreeNode;
+  depth: number;
+  index: number;
+  parentId: TreeNodeId | null;
+  isLastChild: boolean;
+}
+
+/**
+ * Flatten a tree structure into a flat array of visible nodes
+ * @param data - Tree data
+ * @param openIds - Set of IDs of open nodes
+ * @param searchResults - Optional set of search result IDs (will be treated as open)
+ * @returns Flat array of visible nodes with depth and parent information
+ */
+export const flattenVisibleTree = (
+  data: TreeNode[],
+  openIds: Set<TreeNodeId>,
+  searchResults?: Set<TreeNodeId>
+): VisibleNode[] => {
+  const result: VisibleNode[] = [];
+  const openSet = searchResults ? new Set([...openIds, ...searchResults]) : openIds;
+
+  const walk = (nodes: TreeNode[], depth = 0, parentId: TreeNodeId | null = null) => {
+    nodes.forEach((node, i) => {
+      const isLast = i === nodes.length - 1;
+      result.push({ node, depth, index: result.length, parentId, isLastChild: isLast });
+
+      if (node.children && openSet.has(node.id)) {
+        walk(node.children, depth + 1, node.id);
+      }
+    });
+  };
+
+  walk(data);
+  return result;
+};
