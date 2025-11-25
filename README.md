@@ -1,9 +1,27 @@
-# Arborix
+<div align="center">
+  <img src="./public/assets/ARBORIX_LOGO.png" alt="Arborix Logo" width="350" />
+  <br />
+  <br />
 
-> Modern, headless tree component for React with full TypeScript support
+  [![npm version](https://img.shields.io/npm/v/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
+  [![license](https://img.shields.io/npm/l/arborix?style=flat-square&color=2563eb)](https://github.com/wesleyxmns/arborix/blob/main/LICENSE)
+  [![downloads](https://img.shields.io/npm/dt/arborix?style=flat-square&color=2563eb)](https://www.npmjs.com/package/arborix)
 
-[![npm version](https://img.shields.io/npm/v/arborix.svg)](https://www.npmjs.com/package/arborix)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  <p align="center">
+    <b>Modern, Headless Tree Component for React</b>
+    <br />
+    Full TypeScript support, virtualization, drag & drop, and complete customization.
+    <br />
+    <br />
+    <a href="https://wesleyxmns.github.io/Arborix/">Documentation</a>
+    ·
+    <a href="https://github.com/wesleyxmns/arborix/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/wesleyxmns/arborix/issues">Request Feature</a>
+  </p>
+</div>
+
+<br />
 
 ## ✨ Features
 

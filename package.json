@@ -54,7 +54,10 @@
     "prepublishOnly": "npm run build",
     "demo:dev": "pnpm --filter arborix-demo dev",
     "demo:build": "pnpm --filter arborix-demo build",
-    "dev:all": "concurrently \"pnpm dev\" \"pnpm demo:dev\" --names \"lib,demo\" --prefix-colors \"cyan,magenta\""
+    "dev:all": "concurrently \"pnpm dev\" \"pnpm demo:dev\" --names \"lib,demo\" --prefix-colors \"cyan,magenta\"",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "peerDependencies": {
     "react": ">=18.2.0",
@@ -91,6 +94,8 @@
     "terser": "^5.44.1",
     "typescript": "^5.6.2",
     "vite": "^5.4.8",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.25"
   }
 }
