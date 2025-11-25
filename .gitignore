@@ -35,4 +35,5 @@ yarn-error.log*
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.dbDRAG_DROP_TEST.md
+test_drag_logic.ts

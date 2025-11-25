@@ -13,12 +13,12 @@ export default defineConfig({
       rollupTypes: true,
       copyDtsFiles: true,
       staticImport: true,
-      entryRoot: 'src',
+      entryRoot: 'src/arborix-headless',
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, 'src/arborix-headless/index.ts'),
       name: 'Arborix',
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`,
       formats: ['es', 'cjs'],
@@ -33,15 +33,13 @@ export default defineConfig({
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
         '@tanstack/react-virtual',
-        'framer-motion',
         'react-aria',
         'immer',
         'lodash-es',
         'nanoid',
         'zod',
         'ramda',
-        'eventemitter3',
-        'lucide-react'
+        'eventemitter3'
       ],
       output: {
         globals: {
