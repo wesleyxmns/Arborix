@@ -4,6 +4,13 @@
 /build
 /lib
 
+# Development (não publicar)
+/demo
+/examples
+
+# Legacy v1.x (não publicar)
+/src/arborix
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
@@ -18,10 +25,14 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# Arquivos de IDEs (ex: VSCode)
+# Arquivos de IDEs
 .vscode
 .idea
 *.suo
 *.user
 *.pdb
 *.orig
+
+# OS
+.DS_Store
+Thumbs.db
