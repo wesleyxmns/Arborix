@@ -7,7 +7,11 @@ export default defineConfig({
   ignoreDeadLinks: true, // Ignore dead links for now (pages will be added later)
 
   themeConfig: {
-    logo: '/assets/ARBORIX_LOGO.png',
+    logo: {
+      light: '/assets/ARBORIX_LOGO.png',
+      dark: '/assets/ARBORIX_LOGO.png',
+      alt: 'Arborix Logo'
+    },
 
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
