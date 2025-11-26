@@ -6,7 +6,7 @@ export default defineConfig({
   base: '/Arborix/',
   ignoreDeadLinks: true, // Ignore dead links for now (pages will be added later)
 
-  appearance: false, // Disable light/dark mode toggle - dark mode only
+  appearance: true, // Enable light mode - premium white interface
 
   themeConfig: {
     logo: {

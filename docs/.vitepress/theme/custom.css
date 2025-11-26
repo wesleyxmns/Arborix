@@ -1,53 +1,92 @@
 /**
- * Arborix Documentation Theme
- * Style: Premium / shadcn/ui inspired
- * Palette: Zinc (Dark Mode Only)
- * Font: Inter
- * Status: STRICT REWRITE (Zero-based)
+ * Arborix Documentation - Premium Light Mode
+ * 
+ * Design Philosophy: The absolute best documentation experience
+ * Inspiration: shadcn/ui, Tailwind CSS, Stripe, Linear
+ * 
+ * Color System: Slate (professional) + Blue (accent)
+ * Typography: Inter (perfect for documentation)
+ * Spacing: 4px base unit, generous whitespace
+ * Interactions: Smooth, subtle, delightful
  */
 
 /* ==========================================================================
-   1. Design Tokens (Zinc Palette)
+   1. Design Tokens - Light Mode Excellence
    ========================================================================== */
 :root {
-  /* Backgrounds - Deepest Zinc */
-  --vp-c-bg: #09090b;
-  --vp-c-bg-alt: #18181b;
-  --vp-c-bg-soft: #18181b;
-  --vp-c-bg-mute: #27272a;
+  /* Backgrounds - Pure & Clean */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f8fafc;
+  /* Slate 50 */
+  --vp-c-bg-mute: #f1f5f9;
+  /* Slate 100 */
+  --vp-c-bg-alt: #e2e8f0;
+  /* Slate 200 */
 
-  /* Text - High Contrast */
-  --vp-c-text-1: #fafafa;
-  --vp-c-text-2: #a1a1aa;
-  --vp-c-text-3: #71717a;
+  /* Text - High Contrast & Readable */
+  --vp-c-text-1: #0f172a;
+  /* Slate 900 - Primary */
+  --vp-c-text-2: #475569;
+  /* Slate 600 - Secondary */
+  --vp-c-text-3: #94a3b8;
+  /* Slate 400 - Muted */
 
-  /* Borders - Subtle */
-  --vp-c-border: #27272a;
-  --vp-c-divider: #27272a;
-  --vp-c-gutter: #27272a;
+  /* Borders - Subtle but Visible */
+  --vp-c-border: #e2e8f0;
+  /* Slate 200 */
+  --vp-c-divider: #e2e8f0;
+  --vp-c-gutter: #e2e8f0;
 
-  /* Brand - Blue 600 (Primary Action) */
+  /* Brand - Vibrant Blue */
   --vp-c-brand-1: #2563eb;
+  /* Blue 600 */
   --vp-c-brand-2: #3b82f6;
+  /* Blue 500 */
   --vp-c-brand-3: #60a5fa;
-  --vp-c-brand-soft: rgba(37, 99, 235, 0.15);
+  /* Blue 400 */
+  --vp-c-brand-soft: #eff6ff;
+  /* Blue 50 */
 
-  /* Semantic */
+  /* Semantic Colors */
+  --vp-c-tip: #0ea5e9;
+  /* Sky 500 */
+  --vp-c-tip-soft: #f0f9ff;
+  /* Sky 50 */
+  --vp-c-warning: #f59e0b;
+  /* Amber 500 */
+  --vp-c-warning-soft: #fffbeb;
+  /* Amber 50 */
   --vp-c-danger: #ef4444;
-  --vp-c-warning: #eab308;
-  --vp-c-success: #22c55e;
+  /* Red 500 */
+  --vp-c-danger-soft: #fef2f2;
+  /* Red 50 */
+  --vp-c-success: #10b981;
+  /* Emerald 500 */
+  --vp-c-success-soft: #f0fdf4;
+  /* Emerald 50 */
 
   /* Typography */
   --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Shadows - Subtle Depth */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 /* ==========================================================================
-   2. Global Resets
+   2. Global Resets & Base Styles
    ========================================================================== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: var(--vp-font-family-base);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.011em;
   background-color: var(--vp-c-bg);
   color: var(--vp-c-text-1);
 }
@@ -58,263 +97,478 @@ h3,
 h4,
 h5,
 h6 {
-  letter-spacing: -0.025em;
   font-weight: 700;
   color: var(--vp-c-text-1);
 }
 
+h1 {
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  letter-spacing: -0.02em;
+}
+
 /* ==========================================================================
-   3. Navigation Bar (Glassmorphism)
+   3. Navigation Bar - Clean & Professional
    ========================================================================== */
 .VPNav {
-  background-color: rgba(9, 9, 11, 0.7) !important;
-  backdrop-filter: blur(16px);
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%);
   border-bottom: 1px solid var(--vp-c-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.VPNavBar {
+  padding: 0 24px;
 }
 
 .VPNavBar .logo {
-  height: 32px !important;
+  height: 36px !important;
   width: auto !important;
 }
 
 .VPNavBarTitle .title {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  color: var(--vp-c-text-1);
+  letter-spacing: -0.02em;
+}
+
+.VPNavBarMenu .VPLink {
+  color: var(--vp-c-text-2);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.VPNavBarMenu .VPLink:hover {
+  color: var(--vp-c-text-1);
 }
 
 /* ==========================================================================
-   4. Sidebar (Clean & Active States)
+   4. Sidebar - Organized & Accessible
    ========================================================================== */
 .VPSidebar {
   background-color: var(--vp-c-bg) !important;
   border-right: 1px solid var(--vp-c-border);
+  padding: 32px 0;
 }
 
 /* Section Headers */
 .VPSidebarItem.level-0 {
   font-weight: 600;
+  font-size: 0.875rem;
   color: var(--vp-c-text-1);
-  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  padding: 0 24px;
 }
 
 /* Links */
-.VPSidebarItem.level-1 .text,
-.VPSidebarItem.level-2 .text {
+.VPSidebarItem.level-1 .link,
+.VPSidebarItem.level-2 .link {
   color: var(--vp-c-text-2);
-  transition: color 0.2s;
+  font-weight: 500;
+  border-radius: 6px;
+  margin: 2px 12px;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
 }
 
-.VPSidebarItem.level-1:hover .text,
-.VPSidebarItem.level-2:hover .text {
+.VPSidebarItem.level-1:hover .link,
+.VPSidebarItem.level-2:hover .link {
   color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
 }
 
-/* Active State - Pill Indicator */
+/* Active State - Premium Indicator */
 .VPSidebarItem.is-active>.item>.link {
   color: var(--vp-c-brand-1) !important;
-  background: var(--vp-c-brand-soft);
-  border-left: 2px solid var(--vp-c-brand-1);
-  padding-left: 14px;
-  margin-left: -16px;
+  background-color: var(--vp-c-brand-soft) !important;
+  font-weight: 600;
+  border-left: 3px solid var(--vp-c-brand-1);
+  padding-left: 9px;
 }
 
 .VPSidebarItem.is-active>.item>.link>.text {
   color: var(--vp-c-brand-1) !important;
-  font-weight: 600;
 }
 
 /* ==========================================================================
-   5. Hero Section (Impactful)
+   5. Hero Section - Impactful & Beautiful
    ========================================================================== */
 .VPHero {
-  padding-top: 96px !important;
+  padding-top: 120px !important;
   padding-bottom: 96px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.VPHero .container {
+  max-width: 1152px;
 }
 
 .VPHero .name {
-  background: linear-gradient(to bottom right, #ffffff 30%, #a1a1aa 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 800;
-  font-size: 5rem;
+  font-weight: 900;
+  font-size: 4rem;
   line-height: 1.1;
-  letter-spacing: -0.03em;
-  filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.1));
+  letter-spacing: -0.04em;
 }
 
 .VPHero .text {
   color: var(--vp-c-text-2);
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   line-height: 1.6;
   max-width: 640px;
   margin: 24px auto 0;
+  font-weight: 400;
 }
 
 .VPHero .tagline {
   display: none;
 }
 
-/* Buttons */
+/* Hero Buttons - Premium Feel */
 .VPButton {
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   font-weight: 600;
-  transition: all 0.2s ease;
   font-size: 1rem;
-  padding: 0 24px;
-  height: 48px;
-  line-height: 48px;
+  padding: 0 28px;
+  height: 52px;
+  line-height: 52px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .VPButton.brand {
-  background-color: var(--vp-c-text-1);
-  color: var(--vp-c-bg);
-  border: 1px solid var(--vp-c-text-1);
+  background-color: var(--vp-c-brand-1);
+  color: #ffffff;
+  border: none;
+  box-shadow: var(--shadow-md);
 }
 
 .VPButton.brand:hover {
-  background-color: #e4e4e7;
-  /* Zinc 200 */
-  transform: translateY(-1px);
+  background-color: #1d4ed8;
+  /* Blue 700 */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.VPButton.brand:active {
+  transform: translateY(0);
 }
 
 .VPButton.alt {
-  background-color: transparent;
+  background-color: #ffffff;
   border: 1px solid var(--vp-c-border);
   color: var(--vp-c-text-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .VPButton.alt:hover {
-  background-color: var(--vp-c-bg-mute);
+  background-color: var(--vp-c-bg-soft);
   border-color: var(--vp-c-text-3);
 }
 
 /* ==========================================================================
-   6. Content & Markdown (Readability)
+   6. Content & Markdown - Perfect Readability
    ========================================================================== */
+.vp-doc {
+  max-width: 768px;
+  padding: 48px 32px;
+}
+
 .vp-doc h1 {
   font-size: 3rem;
+  font-weight: 900;
   margin-bottom: 2rem;
   letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 .vp-doc h2 {
   border-bottom: 1px solid var(--vp-c-border);
-  padding-bottom: 0.5rem;
-  margin-top: 3.5rem;
-  font-size: 1.8rem;
+  padding-bottom: 0.75rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.vp-doc h3 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .vp-doc p {
   line-height: 1.75;
   margin-bottom: 1.5rem;
   color: var(--vp-c-text-2);
+  font-size: 1.0625rem;
 }
 
-/* Code Blocks - One Dark Pro Style */
+.vp-doc a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.vp-doc a:hover {
+  color: var(--vp-c-brand-2);
+  text-decoration: underline;
+}
+
+/* Lists */
+.vp-doc ul,
+.vp-doc ol {
+  margin: 1.5rem 0;
+  padding-left: 1.75rem;
+}
+
+.vp-doc li {
+  margin: 0.5rem 0;
+  line-height: 1.75;
+  color: var(--vp-c-text-2);
+}
+
+/* ==========================================================================
+   7. Code Blocks - GitHub Light Style
+   ========================================================================== */
 div[class*='language-'] {
   border-radius: 8px;
   border: 1px solid var(--vp-c-border);
-  background-color: #0d0d0f !important;
+  background-color: var(--vp-c-bg-soft) !important;
   margin: 24px 0;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-div[class*='language-'] .title {
-  border-bottom: 1px solid var(--vp-c-border);
-  background-color: var(--vp-c-bg-alt);
-  color: var(--vp-c-text-2);
+div[class*='language-'] pre {
+  background-color: transparent !important;
+  padding: 20px 24px;
+}
+
+div[class*='language-'] code {
   font-family: var(--vp-font-family-mono);
-  font-size: 0.8rem;
+  font-size: 0.9em;
+  line-height: 1.7;
+}
+
+/* Code Block Header */
+div[class*='language-'] .lang {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Inline Code */
 :not(pre)>code {
   background-color: var(--vp-c-bg-mute);
-  color: var(--vp-c-text-1);
-  padding: 2px 6px;
+  color: var(--vp-c-brand-1);
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.9em;
-  border: 1px solid var(--vp-c-border);
   font-family: var(--vp-font-family-mono);
+  font-weight: 500;
+  border: 1px solid var(--vp-c-border);
 }
 
 /* ==========================================================================
-   7. Admonitions (Callouts)
+   8. Admonitions (Callouts) - Subtle & Informative
    ========================================================================== */
 .custom-block {
   border: 1px solid var(--vp-c-border);
   border-radius: 8px;
-  background-color: transparent !important;
+  padding: 16px 20px;
   margin: 24px 0;
+  background-color: var(--vp-c-bg-soft);
 }
 
 .custom-block.tip {
-  border-left: 4px solid var(--vp-c-success);
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.05), transparent) !important;
+  border-left: 4px solid var(--vp-c-tip);
+  background-color: var(--vp-c-tip-soft);
+  border-color: #bae6fd;
+  /* Sky 200 */
 }
 
 .custom-block.warning {
   border-left: 4px solid var(--vp-c-warning);
-  background: linear-gradient(90deg, rgba(234, 179, 8, 0.05), transparent) !important;
+  background-color: var(--vp-c-warning-soft);
+  border-color: #fde68a;
+  /* Amber 200 */
 }
 
 .custom-block.danger {
   border-left: 4px solid var(--vp-c-danger);
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), transparent) !important;
+  background-color: var(--vp-c-danger-soft);
+  border-color: #fecaca;
+  /* Red 200 */
 }
 
 .custom-block .custom-block-title {
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 8px;
   color: var(--vp-c-text-1);
+  font-size: 0.9375rem;
+}
+
+.custom-block p {
+  margin: 0;
+  color: var(--vp-c-text-2);
 }
 
 /* ==========================================================================
-   8. Feature Cards (Grid)
+   9. Feature Cards - Elegant & Interactive
    ========================================================================== */
+.VPFeatures {
+  padding: 48px 24px;
+  background-color: var(--vp-c-bg);
+}
+
 .VPFeature {
-  background-color: transparent !important;
+  background-color: #ffffff !important;
   border: 1px solid var(--vp-c-border) !important;
-  border-radius: 8px !important;
-  transition: all 0.2s ease;
+  border-radius: 12px !important;
+  padding: 28px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
 .VPFeature:hover {
-  border-color: var(--vp-c-text-3) !important;
-  background-color: var(--vp-c-bg-soft) !important;
-  transform: translateY(-2px);
+  border-color: var(--vp-c-brand-1) !important;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .VPFeature .icon {
-  background-color: var(--vp-c-bg-mute);
-  border-radius: 6px;
-  padding: 10px;
-  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--vp-c-brand-soft), #dbeafe);
+  color: var(--vp-c-brand-1);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+  width: fit-content;
+  font-size: 1.5rem;
 }
 
 .VPFeature .title {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.125rem;
   color: var(--vp-c-text-1);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
 }
 
 .VPFeature .details {
   color: var(--vp-c-text-2);
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 0.9375rem;
 }
 
 /* ==========================================================================
-   9. Footer
+   10. Tables - Clean & Organized
+   ========================================================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: var(--vp-c-bg-soft);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--vp-c-text-1);
+  border-bottom: 2px solid var(--vp-c-border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vp-c-border);
+  color: var(--vp-c-text-2);
+  font-size: 0.9375rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* ==========================================================================
+   11. Footer - Minimal & Clean
    ========================================================================== */
 .VPFooter {
   border-top: 1px solid var(--vp-c-border);
   background-color: var(--vp-c-bg);
-  padding: 48px 0;
+  padding: 48px 24px;
+  margin-top: 96px;
 }
 
 .VPFooter .message,
 .VPFooter .copyright {
   color: var(--vp-c-text-3);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   12. Search - Prominent & Accessible
+   ========================================================================== */
+.VPNavBarSearch {
+  padding: 0 12px;
+}
+
+.DocSearch-Button {
+  background-color: var(--vp-c-bg-soft) !important;
+  border: 1px solid var(--vp-c-border) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.DocSearch-Button:hover {
+  background-color: var(--vp-c-bg-mute) !important;
+  border-color: var(--vp-c-text-3) !important;
+}
+
+/* ==========================================================================
+   13. Responsive Design
+   ========================================================================== */
+@media (max-width: 768px) {
+  .VPHero .name {
+    font-size: 2.5rem;
+  }
+
+  .vp-doc h1 {
+    font-size: 2.25rem;
+  }
+
+  .vp-doc {
+    padding: 32px 20px;
+  }
 }
