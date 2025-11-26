@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'Arborix',
   description: 'Modern, Headless Tree Component for React',
   base: '/Arborix/',
+  ignoreDeadLinks: true, // Ignore dead links for now (pages will be added later)
 
   themeConfig: {
     logo: '/assets/ARBORIX_LOGO.png',
