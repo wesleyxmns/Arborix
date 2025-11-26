@@ -8,8 +8,8 @@ export default defineConfig({
 
   themeConfig: {
     logo: {
-      light: '/assets/ARBORIX_LOGO.png',
-      dark: '/assets/ARBORIX_LOGO.png',
+      light: '/ARBORIX_LOGO.png',
+      dark: '/ARBORIX_LOGO.png',
       alt: 'Arborix Logo'
     },
 

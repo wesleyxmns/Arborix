@@ -6,7 +6,7 @@ hero:
   text: Modern Tree Component for React
   tagline: Headless, TypeScript-first, with virtualization, drag & drop, and complete customization
   image:
-    src: /assets/ARBORIX_LOGO.png
+    src: /ARBORIX_LOGO.png
     alt: Arborix Logo
   actions:
     - theme: brand
