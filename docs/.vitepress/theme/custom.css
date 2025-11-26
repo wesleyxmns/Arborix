@@ -330,6 +330,17 @@ div[class*='language-']:hover {
   background-clip: text;
 }
 
+/* Increase logo size in navbar */
+.VPNavBar .logo {
+  height: 40px !important;
+  width: auto !important;
+}
+
+.VPNavBarTitle .VPImage {
+  height: 40px !important;
+  width: auto !important;
+}
+
 /* ============================================================================
    Table of Contents
    ============================================================================ */
