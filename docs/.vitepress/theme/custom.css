@@ -130,6 +130,8 @@ h3 {
 .VPNavBar .logo {
   height: 36px !important;
   width: auto !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .VPNavBarTitle .title {
@@ -177,8 +179,12 @@ h3 {
   font-weight: 500;
   border-radius: 6px;
   margin: 2px 12px;
-  padding: 6px 12px;
+  padding: 6px 12px 6px 8px;
+  padding-right: 20px;
   transition: all 0.2s ease;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .VPSidebarItem.level-1:hover .link,
@@ -204,8 +210,8 @@ h3 {
    5. Hero Section - Impactful & Beautiful
    ========================================================================== */
 .VPHero {
-  padding-top: 120px !important;
-  padding-bottom: 96px !important;
+  padding-top: 80px !important;
+  padding-bottom: 64px !important;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -219,7 +225,7 @@ h3 {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 900;
-  font-size: 4rem;
+  font-size: 3.5rem;
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
@@ -241,10 +247,10 @@ h3 {
 .VPButton {
   border-radius: 8px !important;
   font-weight: 600;
-  font-size: 1rem;
-  padding: 0 28px;
-  height: 52px;
-  line-height: 52px;
+  font-size: 0.9375rem;
+  padding: 0 24px;
+  height: 44px;
+  line-height: 44px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
