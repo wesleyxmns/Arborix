@@ -52,6 +52,7 @@
     "dev": "vite build --watch",
     "build": "vite build",
     "prepublishOnly": "npm run build",
+    "deploy": "./scripts/deploy.sh",
     "demo:dev": "pnpm --filter arborix-demo dev",
     "demo:build": "pnpm --filter arborix-demo build",
     "dev:all": "concurrently \"pnpm dev\" \"pnpm demo:dev\" --names \"lib,demo\" --prefix-colors \"cyan,magenta\"",
