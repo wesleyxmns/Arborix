@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useRef } from 'react';
 import { useTreeContext } from '../context/TreeContext';
+import { useOptionalItemContext } from '../context/ItemContext';
 import type { TreeCheckboxProps, CheckboxState } from '../types';
 
 // ============================================================================
@@ -7,7 +8,7 @@ import type { TreeCheckboxProps, CheckboxState } from '../types';
 // ============================================================================
 
 export function Checkbox({
-  nodeId,
+  nodeId: nodeIdProp,
   children,
   as: Component = 'input',
   className,
@@ -15,7 +16,17 @@ export function Checkbox({
   onChange,
 }: TreeCheckboxProps) {
   const tree = useTreeContext();
+  const itemContext = useOptionalItemContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
+
+  // Use explicit nodeId if provided, otherwise get from ItemContext
+  const nodeId = nodeIdProp ?? itemContext?.nodeId;
+
+  if (!nodeId) {
+    throw new Error(
+      'Tree.Checkbox requires a nodeId prop or must be used within Tree.Item'
+    );
+  }
 
   // Find the node
   const node = tree.findNode(tree.state.data, nodeId);

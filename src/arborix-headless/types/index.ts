@@ -219,7 +219,7 @@ export interface TreeRootProps extends PolymorphicProps {
 }
 
 export interface TreeListProps extends PolymorphicProps {
-  children: ReactNode;
+  children: ReactNode | ((props: { visibleNodes: TreeNodeId[] }) => ReactNode);
 }
 
 // ============================================================================
@@ -265,7 +265,7 @@ export interface TriggerState {
 }
 
 export interface TreeTriggerProps extends Omit<PolymorphicProps, 'className'> {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional - can get from ItemContext
   children?: ReactNode | ((state: TriggerState) => ReactNode);
   className?: string | ((state: TriggerState) => string);
   onClick?: (e: React.MouseEvent, state: TriggerState) => void;
@@ -282,7 +282,7 @@ export interface CheckboxState {
 }
 
 export interface TreeCheckboxProps extends PolymorphicProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional - can get from ItemContext
   children?: ReactNode | ((state: CheckboxState) => ReactNode);
   onChange?: (checked: boolean, state: CheckboxState) => void;
 }
@@ -301,7 +301,7 @@ export interface LabelState {
 }
 
 export interface TreeLabelProps extends PolymorphicProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional - can get from ItemContext
   editable?: boolean;
   children?: ReactNode | ((state: LabelState) => ReactNode);
   onEditStart?: (node: TreeNode) => void;
@@ -314,7 +314,7 @@ export interface TreeLabelProps extends PolymorphicProps {
 // ============================================================================
 
 export interface TreeContentProps extends PolymorphicProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional - can get from ItemContext
   children: ReactNode | ((node: TreeNode, state: ItemRenderState) => ReactNode);
 }
 

@@ -1,6 +1,7 @@
 import { useMemo, type CSSProperties } from 'react';
 import { useTreeContext } from '../context/TreeContext';
 import { useDragDropContext } from '../context/useDragDropContext';
+import { ItemProvider } from '../context/ItemContext';
 import type { TreeItemProps, ItemRenderState } from '../types';
 
 // ============================================================================
@@ -151,26 +152,28 @@ export function Item({
   const ariaLevel = depth + 1;
 
   return (
-    <Component
-      data-node-id={nodeId}
-      role="treeitem"
-      aria-expanded={ariaExpanded}
-      aria-selected={ariaSelected}
-      aria-level={ariaLevel}
-      tabIndex={state.isEditing ? -1 : 0}
-      draggable={dragDrop && !state.isEditing}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onDragEnd={handleDragEnd}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onContextMenu={handleContextMenu}
-      className={resolvedClassName}
-      style={resolvedStyle}
-    >
-      {typeof children === 'function' ? children(state) : children}
-    </Component>
+    <ItemProvider value={{ nodeId }}>
+      <Component
+        data-node-id={nodeId}
+        role="treeitem"
+        aria-expanded={ariaExpanded}
+        aria-selected={ariaSelected}
+        aria-level={ariaLevel}
+        tabIndex={state.isEditing ? -1 : 0}
+        draggable={dragDrop && !state.isEditing}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
+        className={resolvedClassName}
+        style={resolvedStyle}
+      >
+        {typeof children === 'function' ? children(state) : children}
+      </Component>
+    </ItemProvider>
   );
 }
 

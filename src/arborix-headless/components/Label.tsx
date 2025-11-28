@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useTreeContext } from '../context/TreeContext';
+import { useOptionalItemContext } from '../context/ItemContext';
 import type { TreeLabelProps, LabelState } from '../types';
 
 // ============================================================================
@@ -7,7 +8,7 @@ import type { TreeLabelProps, LabelState } from '../types';
 // ============================================================================
 
 export function Label({
-  nodeId,
+  nodeId: nodeIdProp,
   editable = false,
   children,
   as: Component = 'span',
@@ -18,7 +19,17 @@ export function Label({
   onEditCancel,
 }: TreeLabelProps) {
   const tree = useTreeContext();
+  const itemContext = useOptionalItemContext();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Use explicit nodeId if provided, otherwise get from ItemContext
+  const nodeId = nodeIdProp ?? itemContext?.nodeId;
+
+  if (!nodeId) {
+    throw new Error(
+      'Tree.Label requires a nodeId prop or must be used within Tree.Item'
+    );
+  }
 
   // Find the node
   const node = tree.findNode(tree.state.data, nodeId);

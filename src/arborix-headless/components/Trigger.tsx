@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTreeContext } from '../context/TreeContext';
+import { useOptionalItemContext } from '../context/ItemContext';
 import type { TreeTriggerProps, TriggerState } from '../types';
 
 // ============================================================================
@@ -7,7 +8,7 @@ import type { TreeTriggerProps, TriggerState } from '../types';
 // ============================================================================
 
 export function Trigger({
-  nodeId,
+  nodeId: nodeIdProp,
   children,
   as: Component = 'button',
   className,
@@ -15,6 +16,16 @@ export function Trigger({
   onClick,
 }: TreeTriggerProps) {
   const tree = useTreeContext();
+  const itemContext = useOptionalItemContext();
+
+  // Use explicit nodeId if provided, otherwise get from ItemContext
+  const nodeId = nodeIdProp ?? itemContext?.nodeId;
+
+  if (!nodeId) {
+    throw new Error(
+      'Tree.Trigger requires a nodeId prop or must be used within Tree.Item'
+    );
+  }
 
   // Find the node
   const node = tree.findNode(tree.state.data, nodeId);
