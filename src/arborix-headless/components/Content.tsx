@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTreeContext } from '../context/TreeContext';
+import { useOptionalItemContext } from '../context/ItemContext';
 import type { TreeContentProps, ItemRenderState } from '../types';
 
 // ============================================================================
@@ -7,13 +8,23 @@ import type { TreeContentProps, ItemRenderState } from '../types';
 // ============================================================================
 
 export function Content({
-  nodeId,
+  nodeId: nodeIdProp,
   children,
   as: Component = 'div',
   className,
   style,
 }: TreeContentProps) {
   const tree = useTreeContext();
+  const itemContext = useOptionalItemContext();
+
+  // Use explicit nodeId if provided, otherwise get from ItemContext
+  const nodeId = nodeIdProp ?? itemContext?.nodeId;
+
+  if (!nodeId) {
+    throw new Error(
+      'Tree.Content requires a nodeId prop or must be used within Tree.Item'
+    );
+  }
 
   // Find the node
   const node = tree.findNode(tree.state.data, nodeId);
