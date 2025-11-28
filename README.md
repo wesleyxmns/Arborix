@@ -38,6 +38,21 @@
 - ↩️ **Undo/Redo** - Full history management
 - 🔄 **TypeScript** - Complete type safety
 
+## 🆕 What's New in v2.1
+
+Version 2.1 introduces major usability improvements while maintaining 100% backward compatibility:
+
+- **🎯 Tree.Auto Component** - Automatic tree rendering without manual recursion (90% less code!)
+- **⚡ SimpleTree Preset** - Zero-configuration tree component for quick setups
+- **🔗 ItemContext** - No more repeated `nodeId` props in child components
+- **🧰 TreeRecipes** - 18+ utility functions for common tree operations (filter, sort, search, etc.)
+- **🎣 useTreeHelpers Hook** - 30+ convenience methods for common tasks
+- **📋 Enhanced Tree.List** - Now provides `visibleNodes` for easier rendering
+
+**Migration Guide:** See [MIGRATION_TO_V2.1.md](./MIGRATION_TO_V2.1.md) for detailed upgrade guide (optional, no breaking changes).
+
+**Full Changelog:** See [CHANGELOG_V2.1.md](./CHANGELOG_V2.1.md) for complete list of improvements.
+
 ## 📦 Installation
 
 ```bash
@@ -49,6 +64,55 @@ yarn add arborix
 ```
 
 ## 🚀 Quick Start
+
+### ⚡ Easiest Way (v2.1+) - Zero Configuration
+
+```tsx
+import { SimpleTree } from 'arborix';
+import { useState } from 'react';
+
+function App() {
+  const [data, setData] = useState([
+    {
+      id: '1',
+      label: 'src',
+      children: [
+        { id: '1-1', label: 'components' },
+        { id: '1-2', label: 'hooks' },
+      ],
+    },
+    { id: '2', label: 'package.json' },
+  ]);
+
+  return (
+    <SimpleTree
+      data={data}
+      onDataChange={setData}
+      showCheckboxes
+      editable
+      showIcons
+    />
+  );
+}
+```
+
+### 🎯 Automatic Rendering (v2.1+) - No Recursion Needed
+
+```tsx
+import { Tree } from 'arborix';
+
+function App() {
+  const [data, setData] = useState(myTreeData);
+
+  return (
+    <Tree.Root data={data} onDataChange={setData}>
+      <Tree.Auto showCheckbox editable showIcon />
+    </Tree.Root>
+  );
+}
+```
+
+### 🔧 Full Control - Traditional Approach
 
 ```tsx
 import { Tree } from 'arborix';
@@ -72,16 +136,10 @@ function App() {
       <Tree.List>
         {({ visibleNodes }) =>
           visibleNodes.map((nodeId) => (
-            <Tree.StyledItem key={nodeId} nodeId={nodeId} showIcon>
-              {() => (
-                <>
-                  <Tree.Trigger nodeId={nodeId}>
-                    {({ isOpen }) => <span>{isOpen ? '▼' : '▶'}</span>}
-                  </Tree.Trigger>
-                  <Tree.Label nodeId={nodeId} editable />
-                </>
-              )}
-            </Tree.StyledItem>
+            <Tree.Item key={nodeId} nodeId={nodeId}>
+              <Tree.Trigger />  {/* No need to pass nodeId! */}
+              <Tree.Label editable />
+            </Tree.Item>
           ))
         }
       </Tree.List>
@@ -112,6 +170,44 @@ Arborix is completely headless - it provides the logic and state management whil
 ```
 
 ## 🎯 API Reference
+
+### SimpleTree (v2.1+)
+
+Zero-configuration preset component for quick setups.
+
+```tsx
+interface SimpleTreeProps {
+  data: TreeData;
+  onDataChange?: (data: TreeData) => void;
+  showCheckboxes?: boolean;
+  editable?: boolean;
+  showIcons?: boolean;
+  enableDragDrop?: boolean;
+  enableVirtualization?: boolean;
+  height?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}
+```
+
+### Tree.Auto (v2.1+)
+
+Automatic tree rendering component - no manual recursion needed.
+
+```tsx
+interface AutoProps {
+  showCheckbox?: boolean;
+  showTrigger?: boolean;
+  editable?: boolean;
+  showIcon?: boolean;
+  showGrip?: boolean;
+  renderItem?: (nodeId: TreeNodeId, state: ItemState) => ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  listClassName?: string;
+  listStyle?: React.CSSProperties;
+}
+```
 
 ### Tree.Root
 
@@ -196,7 +292,7 @@ Expand/collapse button for parent nodes.
 
 ```tsx
 interface TriggerProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional in v2.1+ (uses ItemContext)
   children: (state: TriggerState) => ReactNode;
 }
 
@@ -213,7 +309,7 @@ Checkbox for node selection.
 
 ```tsx
 interface CheckboxProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional in v2.1+ (uses ItemContext)
   children: (state: CheckboxState) => ReactNode;
 }
 
@@ -230,7 +326,7 @@ Node label with inline editing support.
 
 ```tsx
 interface LabelProps {
-  nodeId: TreeNodeId;
+  nodeId?: TreeNodeId; // Optional in v2.1+ (uses ItemContext)
   editable?: boolean;
   children?: (state: LabelState) => ReactNode;
 }
@@ -254,7 +350,7 @@ interface LabelState {
     {({ visibleNodes }) =>
       visibleNodes.map((nodeId) => (
         <Tree.Item key={nodeId} nodeId={nodeId}>
-          <Tree.Label nodeId={nodeId} />
+          <Tree.Label />  {/* No nodeId needed! */}
         </Tree.Item>
       ))
     }
@@ -272,10 +368,10 @@ interface LabelState {
         <Tree.StyledItem key={nodeId} nodeId={nodeId} showGrip showIcon>
           {() => (
             <>
-              <Tree.Trigger nodeId={nodeId}>
+              <Tree.Trigger>
                 {({ isOpen }) => <span>{isOpen ? '▼' : '▶'}</span>}
               </Tree.Trigger>
-              <Tree.Label nodeId={nodeId} editable />
+              <Tree.Label editable />
             </>
           )}
         </Tree.StyledItem>
@@ -295,7 +391,7 @@ interface LabelState {
         <Tree.StyledItem key={nodeId} nodeId={nodeId}>
           {() => (
             <>
-              <Tree.Checkbox nodeId={nodeId}>
+              <Tree.Checkbox>
                 {({ isChecked, isPartiallyChecked }) => (
                   <input
                     type="checkbox"
@@ -305,7 +401,7 @@ interface LabelState {
                   />
                 )}
               </Tree.Checkbox>
-              <Tree.Label nodeId={nodeId} />
+              <Tree.Label />
             </>
           )}
         </Tree.StyledItem>
@@ -470,6 +566,84 @@ Manage context menus.
 ```tsx
 const { contextMenu, handleContextMenu, closeContextMenu } = useContextMenu();
 ```
+
+### useTreeHelpers (v2.1+)
+
+Convenience hook with 30+ helper methods for common tree operations.
+
+```tsx
+import { useTreeHelpers } from 'arborix';
+
+function Toolbar() {
+  const helpers = useTreeHelpers();
+
+  return (
+    <>
+      <button onClick={() => helpers.addFolder(null, 'New Folder')}>
+        Add Folder
+      </button>
+      <button onClick={() => helpers.addFolderAndEdit(null)}>
+        Add & Edit
+      </button>
+      <button onClick={() => helpers.deleteSelected()}>
+        Delete Selected
+      </button>
+      <button onClick={() => helpers.expandAll()}>
+        Expand All
+      </button>
+      <button onClick={() => helpers.collapseAll()}>
+        Collapse All
+      </button>
+    </>
+  );
+}
+```
+
+Available helpers:
+- `addFolder`, `addFile`, `addFolderAndEdit`, `addFileAndEdit`
+- `deleteSelected`, `duplicateSelected`
+- `expandAll`, `collapseAll`, `expandRecursive`, `collapseRecursive`
+- `selectAll`, `deselectAll`, `selectAndExpand`, `selectVisible`
+- `sortByLabel`, `sortFoldersFirst`
+- `getStats` (returns total nodes, leaf nodes, folder nodes, etc.)
+- ...and 18 more helpers! See [IMPROVEMENTS_V2.1.md](./IMPROVEMENTS_V2.1.md) for full list.
+
+### TreeRecipes (v2.1+)
+
+Utility functions for tree operations.
+
+```tsx
+import { TreeRecipes } from 'arborix';
+
+// Filter tree by search query
+const filtered = TreeRecipes.filterTree(data, 'search term');
+
+// Sort tree alphabetically
+const sorted = TreeRecipes.sortByLabel(data);
+
+// Find nodes by criteria
+const results = TreeRecipes.findNodes(data, (node) => node.label.includes('test'));
+
+// Get node path from root
+const path = TreeRecipes.getNodePath(data, nodeId);
+
+// Count total nodes
+const count = TreeRecipes.countNodes(data);
+
+// Get all leaf nodes
+const leaves = TreeRecipes.getLeafNodes(data);
+
+// Clone tree deeply
+const cloned = TreeRecipes.cloneTree(data);
+```
+
+Available utilities:
+- `filterTree`, `findNodes`, `findNode`, `findNodeById`
+- `sortByLabel`, `sortByCustom`
+- `getNodePath`, `getNodeDepth`, `getNodeLevel`
+- `countNodes`, `getLeafNodes`, `getFolderNodes`
+- `cloneTree`, `mapTree`, `flattenTree`
+- ...and 6 more utilities! See [IMPROVEMENTS_V2.1.md](./IMPROVEMENTS_V2.1.md) for full list.
 
 ## 📖 TypeScript
 
