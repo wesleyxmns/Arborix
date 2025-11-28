@@ -20,10 +20,11 @@ export default defineConfig({
       { text: 'API', link: '/api/tree-root' },
       { text: 'Examples', link: '/examples/basic' },
       {
-        text: 'v2.0.0',
+        text: 'v2.1.1',
         items: [
+          { text: "What's New in v2.1", link: '/guide/whats-new-v21' },
           { text: 'Changelog', link: 'https://github.com/wesleyxmns/Arborix/releases' },
-          { text: 'Migration Guide', link: '/migration' }
+          { text: 'Migration from v2.0', link: '/migration' }
         ]
       }
     ],
@@ -35,7 +36,16 @@ export default defineConfig({
           items: [
             { text: 'What is Arborix?', link: '/guide/what-is-arborix' },
             { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Installation', link: '/guide/installation' }
+            { text: 'Installation', link: '/guide/installation' },
+            { text: "What's New in v2.1 🆕", link: '/guide/whats-new-v21' }
+          ]
+        },
+        {
+          text: 'Quick Start (v2.1)',
+          items: [
+            { text: 'SimpleTree - Zero Config', link: '/guide/simple-tree' },
+            { text: 'Tree.Auto - Auto Rendering', link: '/guide/tree-auto' },
+            { text: 'Traditional Approach', link: '/guide/traditional-approach' }
           ]
         },
         {
@@ -47,7 +57,15 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Features',
+          text: 'v2.1 Features',
+          items: [
+            { text: 'TreeRecipes Utilities', link: '/guide/tree-recipes' },
+            { text: 'useTreeHelpers Hook', link: '/guide/use-tree-helpers' },
+            { text: 'ItemContext', link: '/guide/item-context' }
+          ]
+        },
+        {
+          text: 'Advanced Features',
           items: [
             { text: 'Drag and Drop', link: '/guide/drag-and-drop' },
             { text: 'Keyboard Navigation', link: '/guide/keyboard-navigation' },
@@ -59,6 +77,13 @@ export default defineConfig({
         }
       ],
       '/api/': [
+        {
+          text: 'Presets (v2.1)',
+          items: [
+            { text: 'SimpleTree', link: '/api/simple-tree' },
+            { text: 'Tree.Auto', link: '/api/tree-auto' }
+          ]
+        },
         {
           text: 'Components',
           items: [
@@ -76,8 +101,16 @@ export default defineConfig({
           text: 'Hooks',
           items: [
             { text: 'useTree', link: '/api/use-tree' },
+            { text: 'useTreeHelpers (v2.1)', link: '/api/use-tree-helpers' },
             { text: 'useTreeKeyboardNavigation', link: '/api/use-tree-keyboard-navigation' },
-            { text: 'useContextMenu', link: '/api/use-context-menu' }
+            { text: 'useContextMenu', link: '/api/use-context-menu' },
+            { text: 'useItemContext (v2.1)', link: '/api/use-item-context' }
+          ]
+        },
+        {
+          text: 'Utilities (v2.1)',
+          items: [
+            { text: 'TreeRecipes', link: '/api/tree-recipes' }
           ]
         },
         {
@@ -92,6 +125,13 @@ export default defineConfig({
       ],
       '/examples/': [
         {
+          text: 'Quick Start (v2.1)',
+          items: [
+            { text: 'SimpleTree Example', link: '/examples/simple-tree' },
+            { text: 'Tree.Auto Example', link: '/examples/tree-auto-example' }
+          ]
+        },
+        {
           text: 'Basic Examples',
           items: [
             { text: 'Basic Tree', link: '/examples/basic' },
@@ -105,8 +145,16 @@ export default defineConfig({
             { text: 'Drag and Drop', link: '/examples/drag-drop' },
             { text: 'Custom Buttons', link: '/examples/custom-buttons' },
             { text: 'Context Menus', link: '/examples/context-menus' },
-            { text: 'Virtualization', link: '/examples/virtualization' },
-            { text: 'File Explorer', link: '/examples/file-explorer' }
+            { text: 'Virtualization', link: '/examples/virtualization' }
+          ]
+        },
+        {
+          text: 'Real-World Examples',
+          items: [
+            { text: 'File Explorer', link: '/examples/file-explorer' },
+            { text: 'Email Client Sidebar', link: '/examples/email-client' },
+            { text: 'Organization Chart', link: '/examples/organization-chart' },
+            { text: 'Task Manager', link: '/examples/task-manager' }
           ]
         }
       ]
